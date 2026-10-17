@@ -11,28 +11,30 @@ export default function AdminLayout() {
   const loc = useLocation();
 
   const items = [
-    { key: '/dashboard', label: t('nav.dashboard') },
-    { key: '/partner/form', label: t('nav.partnerForm') },
-    { key: '/partner/my', label: t('nav.mySubmits') },
-    { key: '/review', label: t('nav.review') },
-    { key: '/admin/users', label: t('nav.users') },
-    { key: '/admin/roles', label: t('nav.roles') },
-    { key: '/admin/templates', label: t('nav.templates') },
+    { key: '/app/dashboard', label: t('nav.dashboard') },
+    { key: '/app/partner/form', label: t('nav.partnerForm') },
+    { key: '/app/partner/my', label: t('nav.mySubmits') },
+    { key: '/app/review', label: t('nav.review') },
+    { key: '/app/admin/users', label: t('nav.users') },
+    { key: '/app/admin/roles', label: t('nav.roles') },
+    { key: '/app/admin/templates', label: t('nav.templates') },
   ];
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    nav('/login');
+    nav('/');
   };
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ color: '#fff', fontWeight: 600 }}>{t('app.name')} — {t('app.phase1')}</div>
+        <div style={{ color: '#fff', fontWeight: 600, cursor: 'pointer' }} onClick={() => nav('/')}>
+          {t('app.name')} — {t('app.phase1')}
+        </div>
         <Space>
           <LangSwitcher />
-          <Button size="small" onClick={() => nav('/portal')}>{t('nav.portal')}</Button>
+          <Button size="small" onClick={() => nav('/')}>Public Page</Button>
           <Button size="small" onClick={logout}>{t('nav.logout')}</Button>
         </Space>
       </Header>

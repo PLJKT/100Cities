@@ -1,8 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Login from '../pages/login';
 import AdminLayout from '../layouts/AdminLayout';
-import PortalLayout from '../layouts/PortalLayout';
-import PublicPortal from '../pages/portal/PublicPortal';
+import Landing from '../pages/landing/Landing';
 import FormFill from '../pages/partner/FormFill';
 import MySubmits from '../pages/partner/MySubmits';
 import ReviewList from '../pages/review/ReviewList';
@@ -16,23 +15,20 @@ import RequireAuth from './guard';
 export default function AppRouter() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-
-      {/* 对外招商门户：免登录 */}
-      <Route path="/portal" element={<PortalLayout />}>
-        <Route index element={<PublicPortal />} />
-      </Route>
+      {/* 对外公开落地页（免登录） */}
+      <Route index element={<Landing />} />
+      <Route path="login" element={<Login />} />
 
       {/* 内部业务平台：登录 + RBAC */}
       <Route
-        path="/"
+        path="app"
         element={
           <RequireAuth>
             <AdminLayout />
           </RequireAuth>
         }
       >
-        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route index element={<Navigate to="/app/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="partner/form" element={<FormFill />} />
         <Route path="partner/my" element={<MySubmits />} />
@@ -43,6 +39,8 @@ export default function AppRouter() {
         <Route path="admin/templates" element={<TemplateEditor />} />
       </Route>
 
+      {/* 兼容旧链接 */}
+      <Route path="portal" element={<Navigate to="/" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

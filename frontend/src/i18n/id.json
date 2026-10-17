@@ -1,11 +1,60 @@
 {
   "app.name": "100Cities",
   "app.phase1": "Pengumpulan Aset Phase1",
+
+  "landing.hero.kicker": "JABABAKA · KIJA · OKTOBER 2026",
+  "landing.hero.title1": "Membangun 100 Kota",
+  "landing.hero.title2": "di Seluruh Indonesia",
+  "landing.hero.subtitle": "Infrastruktur · Kawasan Industri · Pendidikan · Kesehatan — empat pilar di balik visi KIJA atas 100 ekosistem ekonomi dan kehidupan.",
+  "landing.hero.cta": "Masuk Mitra",
+  "landing.hero.cta.secondary": "Prospektus Investasi",
+
+  "landing.stats.estates.label": "Kawasan industri di Cikarang",
+  "landing.stats.estates.value": "7",
+  "landing.stats.kendal.label": "Kontribusi Kendal terhadap penjualan 1H2026",
+  "landing.stats.kendal.value": "±71%",
+  "landing.stats.revenue.label": "Penjualan pemasaran 1H2026",
+  "landing.stats.revenue.value": "Rp 1,19 T",
+  "landing.stats.edu.label": "Tahun investasi SDM",
+  "landing.stats.edu.value": "25+",
+
+  "landing.pillars.title": "Empat Pilar Pertumbuhan",
+  "landing.pillars.subtitle": "Pendapatan infrastruktur berulang, properti industri, pendidikan, dan kesehatan — dibangun bersama, bukan terpisah.",
+
+  "pillar.infra.title": "Infrastruktur (JI)",
+  "pillar.infra.body": "PT Jababeka Infrastruktur (JI) menjalankan merger, akuisisi, dan kemitraan di bidang kelistrikan, air, air limbah, logistik, dan infrastruktur kawasan.",
+
+  "pillar.kendal.title": "Kendal Industrial Park",
+  "pillar.kendal.body": "Usaha patungan 51/49 dengan Sembcorp Development. Kawasan Ekonomi Khusus dan tujuan manufaktur internasional di Indonesia.",
+
+  "pillar.edu.title": "President University",
+  "pillar.edu.body": "Berdiri 2001. 'Bringing Civilizations Together' — lulusan siap industri, on-the-job training di tujuh kawasan Cikarang.",
+
+  "pillar.health.title": "Rumah Sakit PURTH",
+  "pillar.health.body": "President University Research & Teaching Hospital, soft opening 10 Oktober 2026. Layanan kesehatan, pendidikan dokter, riset, dan inovasi dalam satu medical city.",
+
+  "landing.sez.title": "Dua Kawasan Ekonomi Khusus",
+  "landing.sez.subtitle": "Kerjasama internasional dalam skema twin-park / twin-island.",
+  "sez.tanjung.title": "Tanjung Lesung (Banten)",
+  "sez.tanjung.body": "KEK pariwisata pantai. Menjajaki kerjasama Two Countries, Twin Parks dengan Fuzhou, Tiongkok — pariwisata, pendidikan, perikanan, produk perairan.",
+  "sez.morotai.title": "Morotai (Maluku Utara)",
+  "sez.morotai.body": "KEK Indonesia Timur. Menjajaki kerjasama Twin Island dengan Hainan, Tiongkok — MICE, logistik kelautan, pengolahan perikanan, penerbangan.",
+
+  "landing.vision.title": "100 Kota = 100 Ekosistem Ekonomi & Kehidupan",
+  "landing.vision.body": "Membangun kota berarti mencetak SDM; mencetak SDM berarti membangun masa depan bangsa. Sekolah, universitas, klinik, dan rumah sakit bukan pelengkap kawasan industri — melainkan keunggulan kompetitif jangka panjang suatu daerah.",
+  "landing.vision.tagline": "Think Big, Start Small, Move Fast.",
+  "landing.vision.tagline2": "Building Cities, Developing People, Improving Health, Bringing Civilizations Together.",
+
+  "landing.footer.rights": "© 2026 PT Kawasan Industri Jababeka Tbk (IDX: KIJA). Portal mitra internal.",
+  "landing.footer.signin": "Masuk Mitra",
+
   "login.title": "Masuk ke 100Cities",
   "login.username": "Nama pengguna",
   "login.password": "Kata sandi",
   "login.submit": "Masuk",
   "login.failed": "Nama pengguna atau kata sandi salah",
+  "login.back": "Kembali ke halaman proyek",
+
   "nav.dashboard": "Dasbor",
   "nav.partnerForm": "Formulir Phase1",
   "nav.mySubmits": "Pengajuan Saya",
@@ -13,13 +62,13 @@
   "nav.users": "Pengguna",
   "nav.roles": "Peran",
   "nav.templates": "Template Formulir",
-  "nav.portal": "Portal Publik",
   "nav.logout": "Keluar",
+
   "form.fill": "Isi Formulir Phase1",
   "form.draft": "Simpan draf",
   "form.submit": "Kirim",
-  "form.submit.confirm": "Kirim sekarang? Lampiran akan dikemas di memori dan diteruskan ke kotak surat kerja. Setelah dikirim, catatan terkunci read-only.",
-  "form.upload": "Unggah lampiran (di memori, tidak disimpan di server)",
+  "form.submit.confirm": "Kirim sekarang? Lampiran akan dikemas di memori dan diteruskan ke kotak surat kerja.",
+  "form.upload": "Unggah lampiran (di memori, tidak disimpan)",
   "review.approve": "Setujui",
   "review.reject": "Tolak (tulis catatan)",
   "review.remind": "Kirim pengingat",
@@ -27,11 +76,7 @@
   "dash.progress": "Kemajuan proyek",
   "dash.overdue": "Pengajuan terlambat",
   "dash.completion": "Tingkat penyelesaian",
-  "portal.intro": "Profil proyek",
-  "portal.invest": "Informasi investasi",
   "export.excel": "Ekspor Excel",
   "export.pdf": "Ekspor PDF",
-  "export.zip": "Ekspor manifes ZIP",
-  "export.agreement": "Ekspor draf perjanjian",
   "lang.switch": "Bahasa"
 }

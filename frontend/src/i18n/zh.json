@@ -1,11 +1,60 @@
 {
   "app.name": "百城系统",
   "app.phase1": "Phase1 资产资料收集",
+
+  "landing.hero.kicker": "JABABEKKA · KIJA · 2026 年 10 月",
+  "landing.hero.title1": "在印尼建设 100 座城市",
+  "landing.hero.title2": "基础设施 · 工业地产 · 教育 · 医疗",
+  "landing.hero.subtitle": "KIJA 以四大支柱构建 100 个经济与生活生态系统的长期愿景。",
+  "landing.hero.cta": "合作方登录",
+  "landing.hero.cta.secondary": "投资资料",
+
+  "landing.stats.estates.label": "芝卡朗工业园区数量",
+  "landing.stats.estates.value": "7",
+  "landing.stats.kendal.label": "肯达尔贡献 2026 上半年销售",
+  "landing.stats.kendal.value": "约 71%",
+  "landing.stats.revenue.label": "2026 上半年营销销售额",
+  "landing.stats.revenue.value": "1.19 万亿印尼盾",
+  "landing.stats.edu.label": "人才培养投资年限",
+  "landing.stats.edu.value": "25+",
+
+  "landing.pillars.title": "四大增长支柱",
+  "landing.pillars.subtitle": "经常性基础设施收入、工业地产、教育与医疗——协同发展，而非孤立推进。",
+
+  "pillar.infra.title": "基础设施（JI）",
+  "pillar.infra.body": "PT Jababeka Infrastruktur（JI）通过并购与战略合作，拓展电力、水务、污水处理、物流与园区基础设施业务，打造长期经常性收入。",
+
+  "pillar.kendal.title": "肯达尔工业园（KIK）",
+  "pillar.kendal.body": "与新加坡胜科工业 51:49 合资。经济特区定位，印尼重要国际制造业投资目的地。",
+
+  "pillar.edu.title": "总统大学",
+  "pillar.edu.body": "创立于 2001 年，以'汇聚不同文明'为理念。依托芝卡朗七大园区，提供实习、在职培训与国际化学术环境。",
+
+  "pillar.health.title": "PURTH 教学医院",
+  "pillar.health.body": "总统大学研究教学医院，2026 年 10 月 10 日试运行。集医疗服务、医学教育、医学研究与医疗创新于一体的医疗城。",
+
+  "landing.sez.title": "两个经济特区",
+  "landing.sez.subtitle": "以'双园'与'双岛'模式开展国际合作。",
+  "sez.tanjung.title": "丹绒勒松（万丹）",
+  "sez.tanjung.body": "滨海旅游经济特区。探索与中国福州的'两国双园'合作，重点旅游、教育、渔业及水产品加工。",
+  "sez.morotai.title": "摩罗泰（北马鲁古）",
+  "sez.morotai.body": "印尼东部经济特区。探索与中国海南的'双岛'合作，重点会展、海洋物流、渔业加工与航空。",
+
+  "landing.vision.title": "100 座城市 = 100 个经济与生活生态系统",
+  "landing.vision.body": "建设城市就是培养人才；培养人才就是建设国家未来。学校、大学、诊所与医院并非工业园区的配套设施，而是区域长期竞争力的重要组成。",
+  "landing.vision.tagline": "Think Big, Start Small, Move Fast.",
+  "landing.vision.tagline2": "建设城市，培养人才，改善健康，促进文明交流。",
+
+  "landing.footer.rights": "© 2026 PT Kawasan Industri Jababeka Tbk (IDX: KIJA) 内部合作方门户。",
+  "landing.footer.signin": "合作方登录",
+
   "login.title": "登录百城系统",
   "login.username": "用户名",
   "login.password": "密码",
   "login.submit": "登录",
   "login.failed": "用户名或密码错误",
+  "login.back": "返回项目首页",
+
   "nav.dashboard": "看板",
   "nav.partnerForm": "Phase1 表单",
   "nav.mySubmits": "我的提交",
@@ -13,25 +62,21 @@
   "nav.users": "账号管理",
   "nav.roles": "角色权限",
   "nav.templates": "表单配置",
-  "nav.portal": "招商门户",
   "nav.logout": "退出登录",
+
   "form.fill": "填写 Phase1 表单",
   "form.draft": "保存草稿",
   "form.submit": "提交",
-  "form.submit.confirm": "确认提交？附件将在内存中打包并转发至工作邮箱，提交后记录锁定只读不可修改。",
+  "form.submit.confirm": "提交后附件将在内存中打包并转发至工作邮箱，记录锁定只读。",
   "form.upload": "上传附件（内存处理，服务器不落盘）",
   "review.approve": "审核通过",
-  "review.reject": "退回补件（手写备注）",
+  "review.reject": "退回补件",
   "review.remind": "发送催报",
   "review.remark": "备注",
   "dash.progress": "项目进度",
   "dash.overdue": "逾期单据",
   "dash.completion": "完成率",
-  "portal.intro": "项目介绍",
-  "portal.invest": "招商信息",
   "export.excel": "导出 Excel",
   "export.pdf": "导出 PDF",
-  "export.zip": "导出附件清单 ZIP",
-  "export.agreement": "导出协议附件",
   "lang.switch": "语言"
 }

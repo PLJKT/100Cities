@@ -1,11 +1,60 @@
 {
   "app.name": "100Cities",
   "app.phase1": "Phase1 Asset Collection",
+
+  "landing.hero.kicker": "JABABAKA · KIJA · OCTOBER 2026",
+  "landing.hero.title1": "Building 100 Cities",
+  "landing.hero.title2": "Across Indonesia",
+  "landing.hero.subtitle": "Infrastructure · Industrial Estate · Education · Healthcare — the four pillars behind KIJA's vision of 100 economic and living ecosystems.",
+  "landing.hero.cta": "Partner Sign In",
+  "landing.hero.cta.secondary": "Investment Brief",
+
+  "landing.stats.estates.label": "Industrial estates in Cikarang",
+  "landing.stats.estates.value": "7",
+  "landing.stats.kendal.label": "Kendal share of 1H2026 sales",
+  "landing.stats.kendal.value": "~71%",
+  "landing.stats.revenue.label": "1H2026 marketing sales",
+  "landing.stats.revenue.value": "Rp 1.19 T",
+  "landing.stats.edu.label": "Years of human-capital investment",
+  "landing.stats.edu.value": "25+",
+
+  "landing.pillars.title": "Four Growth Pillars",
+  "landing.pillars.subtitle": "Recurring infrastructure income, industrial property, education, and healthcare — built together, not in isolation.",
+
+  "pillar.infra.title": "Infrastructure (JI)",
+  "pillar.infra.body": "PT Jababeka Infrastrruktur (JI) pursues mergers, acquisitions, and partnerships in power, water, wastewater, logistics, and estate infrastructure to grow recurring income.",
+
+  "pillar.kendal.title": "Kendal Industrial Park",
+  "pillar.kendal.body": "51/49 JV with Sembcorp Development. A Special Economic Zone and Indonesia's designated international manufacturing destination.",
+
+  "pillar.edu.title": "President University",
+  "pillar.edu.body": "Founded 2001. 'Bringing Civilizations Together' — industry-ready graduates, on-the-job training across Cikarang's seven estates.",
+
+  "pillar.health.title": "PURTH Hospital",
+  "pillar.health.body": "President University Research & Teaching Hospital, soft-opened Oct 10 2026. Healthcare, clinical education, research, and innovation in one medical city.",
+
+  "landing.sez.title": "Two Special Economic Zones",
+  "landing.sez.subtitle": "International cooperation under two twin-park / twin-island concepts.",
+  "sez.tanjung.title": "Tanjung Lesung (Banten)",
+  "sez.tanjung.body": "Coastal tourism SEZ. Exploring Two Countries, Twin Parks cooperation with Fuzhou, China — tourism, education, fisheries, marine products.",
+  "sez.morotai.title": "Morotai (North Maluku)",
+  "sez.morotai.body": "Eastern Indonesia SEZ. Exploring Twin Island cooperation with Hainan, China — MICE, marine logistics, fisheries processing, aviation.",
+
+  "landing.vision.title": "100 Cities = 100 Economic & Living Ecosystems",
+  "landing.vision.body": "Building a city means educating people; educating people means building the nation's future. Schools, universities, clinics, and hospitals are not appendages of industrial development — they are the long-term competitive advantage of a region.",
+  "landing.vision.tagline": "Think Big, Start Small, Move Fast.",
+  "landing.vision.tagline2": "Building Cities, Developing People, Improving Health, Bringing Civilizations Together.",
+
+  "landing.footer.rights": "© 2026 PT Kawasan Industri Jababeka Tbk (IDX: KIJA). Internal partner portal.",
+  "landing.footer.signin": "Partner Sign In",
+
   "login.title": "Sign in to 100Cities",
   "login.username": "Username",
   "login.password": "Password",
   "login.submit": "Sign in",
   "login.failed": "Invalid username or password",
+  "login.back": "Back to project page",
+
   "nav.dashboard": "Dashboard",
   "nav.partnerForm": "Phase1 Form",
   "nav.mySubmits": "My Submissions",
@@ -13,8 +62,8 @@
   "nav.users": "Users",
   "nav.roles": "Roles",
   "nav.templates": "Form Templates",
-  "nav.portal": "Public Portal",
   "nav.logout": "Sign out",
+
   "form.fill": "Fill Phase1 Form",
   "form.draft": "Save draft",
   "form.submit": "Submit",
@@ -27,11 +76,7 @@
   "dash.progress": "Project progress",
   "dash.overdue": "Overdue submissions",
   "dash.completion": "Completion rate",
-  "portal.intro": "Project introduction",
-  "portal.invest": "Investment information",
   "export.excel": "Export Excel",
   "export.pdf": "Export PDF",
-  "export.zip": "Export ZIP manifest",
-  "export.agreement": "Export agreement draft",
   "lang.switch": "Language"
 }
