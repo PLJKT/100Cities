@@ -3,14 +3,20 @@ import { getDb } from '../../config/db';
 import { authRequired, AuthedRequest } from '../../middlewares/auth';
 import { requirePerm } from '../../middlewares/rbac';
 import { writeLog } from '../log/log.service';
-import { sendWhatsAppNotification } from '../notify/notify.service';
+import { sendRejectNotification, sendWhatsAppNotification } from '../notify/notify.service';
+import type { Lang } from '../notify/templates';
 
 const r = Router();
+
+function pickLang(req: AuthedRequest): Lang {
+  const h = (req.headers['x-lang'] as string) || 'en';
+  return (h === 'id' || h === 'zh' ? h : 'en') as Lang;
+}
 
 r.get('/submits', authRequired, requirePerm('review'), (_req, res) => {
   const rows = getDb()
     .prepare(
-      `SELECT s.id, s.doc_no, s.status, s.submit_time, s.remark, u.username, u.partner_name
+      `SELECT s.id, s.doc_no, s.status, s.submit_time, s.remark, u.username, u.partner_name, u.email
        FROM form_submit s JOIN sys_user u ON u.id=s.user_id
        ORDER BY s.id DESC`
     )
@@ -19,14 +25,8 @@ r.get('/submits', authRequired, requirePerm('review'), (_req, res) => {
 });
 
 r.post('/:id/approve', authRequired, requirePerm('review'), (req: AuthedRequest, res) => {
-  // 注意：form_submit.locked=1 后触发器禁止 UPDATE 主行；
-  // 审核结果写入独立列需在锁之前完成或通过专门的审核表记录。
-  // 这里用 SQLite 触发器允许的方式：把审核态写到非锁定字段（实际 schema 中 status 列在 locked=1 时 UPDATE 会被触发器拦截）。
-  // 为绕过只读锁（业务要求"原始提交数据不可改"，但审核结论属于新事件），我们用 sys_operation_log 记录审核结论，
-  // 并在 form_submit 上通过 BEFORE UPDATE 触发器的白名单放行 status 变化（见 schema 备注）。
-  const db = getDb();
   try {
-    db.prepare(`UPDATE form_submit SET status='approved' WHERE id=?`).run(req.params.id);
+    getDb().prepare(`UPDATE form_submit SET status='approved' WHERE id=?`).run(req.params.id);
   } catch (e: any) {
     return res.status(423).json({ error: { code: 'LOCKED', message: e.message } });
   }
@@ -34,15 +34,20 @@ r.post('/:id/approve', authRequired, requirePerm('review'), (req: AuthedRequest,
   res.json({ ok: true });
 });
 
-r.post('/:id/reject', authRequired, requirePerm('review'), (req: AuthedRequest, res) => {
+r.post('/:id/reject', authRequired, requirePerm('review'), async (req: AuthedRequest, res) => {
   const { remark } = req.body || {};
   const db = getDb();
+  let row: any;
   try {
     db.prepare(`UPDATE form_submit SET status='rejected', remark=? WHERE id=?`).run(remark || '', req.params.id);
+    row = db.prepare(`SELECT doc_no, email FROM form_submit s JOIN sys_user u ON u.id=s.user_id WHERE s.id=?`).get(req.params.id);
   } catch (e: any) {
     return res.status(423).json({ error: { code: 'LOCKED', message: e.message } });
   }
   writeLog(req.user!.uid, 'review.reject', 'form_submit', Number(req.params.id), { remark });
+  if (row?.email) {
+    sendRejectNotification({ lang: pickLang(req), to: row.email, docNo: row.doc_no, remark: remark || '' }).catch(() => {});
+  }
   sendWhatsAppNotification({ text: `Submission ${req.params.id} needs correction: ${remark}` }).catch(() => {});
   res.json({ ok: true });
 });

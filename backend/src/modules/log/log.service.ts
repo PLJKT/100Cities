@@ -1,4 +1,4 @@
-import { getDb } from '../config/db';
+import { getDb } from '../../config/db';
 
 export function writeLog(userId: number | null, action: string, targetType: string, targetId: number | null, detail: any) {
   getDb()

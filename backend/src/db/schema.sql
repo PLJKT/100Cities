@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS sys_user (
   password_hash TEXT NOT NULL,
   role_id       INTEGER NOT NULL REFERENCES sys_role(id),
   partner_name  TEXT,
+  email         TEXT,
   phone         TEXT,
   enabled       INTEGER NOT NULL DEFAULT 1,
   created_by    INTEGER,
