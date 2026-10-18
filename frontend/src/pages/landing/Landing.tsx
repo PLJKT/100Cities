@@ -98,8 +98,9 @@ function SegmentCell({ bg, color, label }: { bg: string; color: string; label: s
     <div style={{
       background: bg, color, height: 64, borderRadius: 4,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      textAlign: 'center', padding: 8,
-      fontSize: 14, fontWeight: 700, lineHeight: 1.25,
+      textAlign: 'center', padding: 6,
+      fontSize: 'clamp(10px, 1.6vw, 14px)', fontWeight: 700, lineHeight: 1.25,
+      wordBreak: 'break-word', overflowWrap: 'anywhere',
     }}>
       {label}
     </div>
@@ -290,49 +291,49 @@ export default function Landing() {
 
       {/* Members — one row */}
       <div style={{ padding: '24px 16px', background: '#fdfcf8', borderTop: '1px solid #ececec', borderBottom: '1px solid #ececec' }}>
-        <Title level={5} style={{ textAlign: 'center', marginBottom: 14, color: '#0f4d3a', fontSize: 18 }}>
+        <Title level={5} style={{ textAlign: 'center', marginBottom: 14, color: '#0f4d3a', fontSize: 'clamp(16px, 2.4vw, 18px)' }}>
           {t('landing.members.title')}
         </Title>
-        <div style={{ display: 'flex', gap: 10, maxWidth: 1080, margin: '0 auto' }}>
+        <div style={{ display: 'flex', gap: 8, maxWidth: 1080, margin: '0 auto' }}>
           {members.map((m, i) => (
             <div key={i} style={{
               flex: 1, minWidth: 0, background: '#fff', border: '1px solid #ececec',
-              borderRadius: 8, padding: '12px 10px', textAlign: 'center',
+              borderRadius: 8, padding: '10px 8px', textAlign: 'center',
             }}>
-              <div style={{ fontWeight: 700, fontSize: 12.5, marginBottom: 5, color: '#0f4d3a', lineHeight: 1.3 }}>{m.title}</div>
-              <div style={{ color: '#6b6b6b', fontSize: 11, lineHeight: 1.45 }}>{m.body}</div>
+              <div style={{ fontWeight: 700, fontSize: 'clamp(10px, 1.5vw, 12.5px)', marginBottom: 4, color: '#0f4d3a', lineHeight: 1.3, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{m.title}</div>
+              <div style={{ color: '#6b6b6b', fontSize: 'clamp(9px, 1.2vw, 11px)', lineHeight: 1.4, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{m.body}</div>
             </div>
           ))}
         </div>
       </div>
 
       {/* Engine 5 steps — horizontal flow */}
-      <div style={{ padding: '16px 16px 20px', background: '#0f4d3a', color: '#fff' }}>
-        <Title level={4} style={{ color: '#fff', textAlign: 'center', marginBottom: 14, fontWeight: 600, fontSize: 20 }}>
+      <div style={{ padding: '16px 12px 20px', background: '#0f4d3a', color: '#fff' }}>
+        <Title level={4} style={{ color: '#fff', textAlign: 'center', marginBottom: 14, fontWeight: 600, fontSize: 'clamp(17px, 2.6vw, 20px)' }}>
           {t('landing.engine.title')}
         </Title>
         <div style={{
           display: 'flex', justifyContent: 'center', alignItems: 'stretch',
-          gap: 6, maxWidth: 1080, margin: '0 auto',
+          gap: 4, maxWidth: 1080, margin: '0 auto',
         }}>
           {engine.map((e, i) => (
-            <div key={e.n} style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
+            <div key={e.n} style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1, minWidth: 0 }}>
               <div style={{
                 background: 'rgba(255,255,255,0.06)',
                 border: '1px solid rgba(212,175,55,0.35)',
-                borderRadius: 8, padding: '10px 10px',
+                borderRadius: 8, padding: '8px 6px',
                 textAlign: 'center', width: '100%',
               }}>
                 <div style={{
-                  width: 26, height: 26, borderRadius: '50%', background: '#d4af37',
-                  color: '#0f4d3a', fontWeight: 700, lineHeight: '26px', margin: '0 auto 6px',
-                  fontSize: 12,
+                  width: 24, height: 24, borderRadius: '50%', background: '#d4af37',
+                  color: '#0f4d3a', fontWeight: 700, lineHeight: '24px', margin: '0 auto 5px',
+                  fontSize: 'clamp(10px, 1.4vw, 12px)',
                 }}>{e.n}</div>
-                <div style={{ fontWeight: 600, fontSize: 12, marginBottom: 3 }}>{e.title}</div>
-                <div style={{ color: 'rgba(255,255,255,0.72)', fontSize: 10.5, lineHeight: 1.4 }}>{e.body}</div>
+                <div style={{ fontWeight: 600, fontSize: 'clamp(9px, 1.3vw, 12px)', marginBottom: 3, lineHeight: 1.25 }}>{e.title}</div>
+                <div style={{ color: 'rgba(255,255,255,0.78)', fontSize: 'clamp(8px, 1.1vw, 10.5px)', lineHeight: 1.35 }}>{e.body}</div>
               </div>
               {i < engine.length - 1 && (
-                <div style={{ color: '#d4af37', fontSize: 16, fontWeight: 700, flexShrink: 0 }}>→</div>
+                <div style={{ color: '#d4af37', fontSize: 'clamp(12px, 2vw, 16px)', fontWeight: 700, flexShrink: 0 }}>→</div>
               )}
             </div>
           ))}
@@ -340,12 +341,12 @@ export default function Landing() {
       </div>
 
       {/* Vision */}
-      <div style={{ padding: '32px 20px', textAlign: 'center' }}>
-        <Title level={5} style={{ maxWidth: 680, margin: '0 auto 10px', color: '#0f4d3a', fontSize: 17 }}>
+      <div style={{ padding: '28px 20px', textAlign: 'center' }}>
+        <Title level={5} style={{ maxWidth: 680, margin: '0 auto 10px', color: '#0f4d3a', fontSize: 'clamp(15px, 2vw, 17px)' }}>
           {t('landing.vision.title')}
         </Title>
         <Text style={{ color: '#0f4d3a', fontWeight: 600, fontStyle: 'italic' }}>{t('landing.vision.tagline')}</Text>
-        <div style={{ marginTop: 16 }}>
+        <div style={{ marginTop: 14 }}>
           <Button type="primary" size="large"
             style={{ background: '#0f4d3a', borderColor: '#0f4d3a', fontWeight: 600 }}
             onClick={() => nav('/login')}>
@@ -356,8 +357,9 @@ export default function Landing() {
 
       {/* Footer */}
       <div style={{
-        padding: '18px 24px', textAlign: 'center',
-        background: '#0a3626', color: 'rgba(255,255,255,0.55)', fontSize: 11, lineHeight: 1.7,
+        padding: '20px 20px', textAlign: 'center',
+        background: '#0a3626', color: 'rgba(255,255,255,0.85)',
+        fontSize: 'clamp(10px, 1.4vw, 11.5px)', lineHeight: 1.8,
       }}>
         {t('footer.disclaimer')}
       </div>
