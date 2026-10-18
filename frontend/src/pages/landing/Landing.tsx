@@ -10,7 +10,7 @@ const { Title, Paragraph, Text } = Typography;
 function ClubLogo({ size = 36 }: { size?: number }) {
   return (
     <img
-      src="/club-logo.jpg"
+      src={`${import.meta.env.BASE_URL}club-logo.jpg`}
       alt="100 Cities Club — Building a ship while sailing"
       width={size}
       height={size}
@@ -165,7 +165,7 @@ export default function Landing() {
       }}>
         {/* Gold Indonesia map — mix-blend-mode:screen drops the JPG's black background */}
         <img
-          src="/indonesia-map.jpg"
+          src={`${import.meta.env.BASE_URL}indonesia-map.jpg`}
           alt=""
           aria-hidden="true"
           style={{
@@ -220,7 +220,7 @@ export default function Landing() {
         </Paragraph>
         <div style={{ maxWidth: 1080, margin: '0 auto 18px', borderRadius: 8, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
           <img
-            src="/jababeka-banner.png"
+            src={`${import.meta.env.BASE_URL}jababeka-banner.png`}
             alt="Jababeka township — residences, clubhouse, power infrastructure, golf course and university campus"
             style={{ width: '100%', display: 'block' }}
           />
