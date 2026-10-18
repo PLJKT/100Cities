@@ -130,19 +130,20 @@ export default function Landing() {
       <div style={{
         position: 'sticky', top: 0, zIndex: 10,
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        flexWrap: 'wrap', rowGap: 6,
         padding: '8px 12px', background: 'rgba(255,255,255,0.97)',
         borderBottom: '1px solid #ececec', gap: 8,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: '1 1 auto' }}>
           <ClubLogo size={32} />
           <span style={{
             fontWeight: 800,
-            fontSize: 'clamp(10px, 3.4vw, 26px)',
+            fontSize: 'clamp(10px, 3.2vw, 26px)',
             letterSpacing: 0.5,
             color: '#1a1a1a',
             fontFamily: "'Archivo Black','Montserrat','Helvetica Neue',Arial,sans-serif",
-            lineHeight: 1,
-            whiteSpace: 'nowrap',
+            lineHeight: 1.1,
+            whiteSpace: 'normal',
           }}>
             100 CITIES CLUB
           </span>
