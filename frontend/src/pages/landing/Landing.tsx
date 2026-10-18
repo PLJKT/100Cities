@@ -130,14 +130,14 @@ export default function Landing() {
       <div style={{
         position: 'sticky', top: 0, zIndex: 10,
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        padding: '12px 24px', background: 'rgba(255,255,255,0.97)',
-        borderBottom: '1px solid #ececec',
+        padding: '10px 16px', background: 'rgba(255,255,255,0.97)',
+        borderBottom: '1px solid #ececec', gap: 10,
       }}>
-        <Space size={12} align="center">
-          <ClubLogo size={64} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+          <ClubLogo size={40} />
           <span style={{
             fontWeight: 800,
-            fontSize: 26,
+            fontSize: 'clamp(14px, 4.2vw, 26px)',
             letterSpacing: 1,
             color: '#1a1a1a',
             fontFamily: "'Archivo Black','Montserrat','Helvetica Neue',Arial,sans-serif",
@@ -146,21 +146,21 @@ export default function Landing() {
           }}>
             100 CITIES CLUB
           </span>
-        </Space>
-        <Space size={10}>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           <LangSwitcher />
           <Button type="primary" size="middle"
             style={{ background: '#0f4d3a', borderColor: '#0f4d3a', fontWeight: 600 }}
             onClick={() => nav('/login')}>
             {t('topbar.signin')}
           </Button>
-        </Space>
+        </div>
       </div>
 
       {/* Hero — deep green, gold Indonesia map background, cream text */}
       <div style={{
         position: 'relative',
-        padding: '72px 20px 64px',
+        padding: '48px 20px 44px',
         background: 'linear-gradient(135deg, #0f4d3a 0%, #0a3626 100%)',
         color: '#fff', textAlign: 'center', overflow: 'hidden',
       }}>
@@ -179,18 +179,18 @@ export default function Landing() {
           position: 'absolute', inset: 0,
           background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.15) 60%, transparent 100%)',
         }} />
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', maxWidth: 760, margin: '0 auto' }}>
           <div style={{
-            display: 'inline-block', marginBottom: 20, padding: '6px 18px',
+            display: 'inline-block', marginBottom: 16, padding: '5px 16px',
             border: '1px solid #d4af37', borderRadius: 999,
-            color: '#d4af37', fontSize: 13, letterSpacing: 3, fontWeight: 600,
+            color: '#d4af37', fontSize: 'clamp(11px, 1.6vw, 13px)', letterSpacing: 2, fontWeight: 600,
           }}>
             {t('landing.hero.motto')}
           </div>
           <Title level={1} style={{
             color: '#fff',
-            fontSize: 'clamp(34px, 6.5vw, 60px)',
-            marginBottom: 24,
+            fontSize: 'clamp(28px, 6.5vw, 56px)',
+            marginBottom: 18,
             fontWeight: 800,
             letterSpacing: 1.5,
             textShadow: '0 4px 24px rgba(0,0,0,0.5)',
