@@ -6,7 +6,7 @@
 
   "landing.hero.motto": "边航行边造船",
   "landing.hero.subtitle": "印尼是东盟最大经济体，也是 G20 唯一东盟成员国。按名义 GDP 计算全球第 16 大（约 1.5 万亿美元），按购买力平价计算全球第 8（约 5.4 万亿美元），拥有 2.87 亿人口。未来十年，印尼将由城镇化定义——新城市、新产业节点、新城镇，创造就业、培养人才、振兴地方经济。百城俱乐部（100 Cities Club）是由印尼首家上市工业园区开发商 PT Kawasan Industri Jababeka Tbk（IDX: KIJA）发起设立的邀请制私人平台，旨在领导这一国家工程：联合中央与地方政府、印尼本土企业家与全球资本，在印尼各地共建 100 座城市。",
-  "landing.cred.lead": "百城俱乐部对接印尼综合城区开发商 PT Kawasan Industri Jababeka Tbk（IDX: KIJA）。KIJA 拥有 35 年以上建设综合城区、工业园区、电力、水务、干港、大学与教学医院的经验；俱乐部把这套方法论——以及印尼本身——开放给全球伙伴：制造商、投资者、技术提供方、开发商、教育与医疗机构。",
+  "landing.cred.lead": "百城俱乐部对接印尼综合城区开发商 PT Kawasan Industri Jababeka Tbk（IDX: KIJA）。KIJA 拥有 35 年以上建设综合城区、工业园区、电力、水务、干港、大学与教学医院的经验；俱乐部把这套打法——以及印尼本身——开放给全球伙伴：制造商、投资者、技术提供方、开发商、教育与医疗机构。",
 
   "landing.cred.title": "合作方背景",
   "segment.realestate": "地产",
@@ -18,7 +18,7 @@
   "segment.water": "水务与园区",
   "segment.dryport": "内陆港",
   "landing.cred.list": [
-    { "n": "1989", "l": "创立 · 印尼第一家上市工业园区开发商（1994 年 IPO，代码 KIJA）" },
+    { "n": "1989", "l": "创立 · 印尼首家工业园区开发商（1994 年 IPO 上市，代码 KIJA）" },
     { "n": "5,089 公顷", "l": "跨 4 个园区的战略土地储备" },
     { "n": "2,000+", "l": "来自 34 个国家、入驻 Jababeka 的企业" },
     { "n": "3 个 SEZ", "l": "肯达尔、丹绒勒松、摩罗泰 —— 均为国家级经济特区" },
@@ -28,17 +28,17 @@
   "landing.track.title": "过往实绩",
   "landing.track.bullets": [
     "芝加朗 Jababeka 城 —— 成熟一体化新城，120 万居民、73 万+劳动力",
-    "印尼唯一园区内自备电厂的工业园区（130 MW Bekasi Power）",
-    "芝加朗 dry port（IDJBK）—— 印尼首个集海关、检疫、物流一体的内陆港",
-    "肯达尔工业园于 2016 年 11 月由印尼总统与新加坡总理共同开幕",
+    "印尼唯一自带自备电厂的工业园区（130 MW Bekasi Power）",
+    "芝加朗内陆港（IDJBK）—— 印尼首个集海关、检疫、物流一体的内陆港",
+    "肯达尔工业园于 2016 年 11 月由时任印尼总统与时任新加坡总理共同主持开幕",
     "肯达尔获 2023 年工业部最佳新工业园；Jababeka 获 2020 PropertyGuru 亚洲最佳工业地产开发商"
   ],
 
   "landing.dual.title": "俱乐部如何运作",
-  "landing.dual.subtitle": "两侧协同，一套探索流程 —— 不是一个已经完工的产品。",
+  "landing.dual.subtitle": "两侧协同，一套探索流程 —— 不是一个成品。",
   "landing.dual.id.title": "印尼侧 · KIJA 平台",
   "landing.dual.id.bullets": [
-    "芝加朗 Jababeka 城（旗舰）",
+    "Cikarang Jababeka 城（旗舰）",
     "肯达尔 SEZ —— 制造与物流",
     "丹绒勒松 SEZ —— 旅游与康养",
     "摩罗泰 SEZ —— 海岛与海洋"
@@ -54,10 +54,10 @@
   "landing.flag.title": "旗舰园区：芝加朗 Jababeka 城",
   "landing.flag.bullets": [
     "130 MW 燃气电厂 · 2011 年 2 月与国家电力公司签 20 年包销协议",
-    "芝加朗 dry port 200 公顷 · 保税物流 · 承担 Tanjung Priok 走廊约 62% 吞吐",
+    "Cikarang 内陆港 200 公顷 · 保税物流 · 承担 Tanjung Priok 走廊约 62% 吞吐",
     "总统大学 2001 年创立 · 5 万+ 校友 · 累计发放超 1 亿美元奖学金",
     "供水 740 升/秒 · 污水处理 507 升/秒 · 光纤、燃气、24 小时安保、自有消防队",
-    "租户结构：电子、汽车、食品饮料、制药、消费品 —— Mattel、Samsung、Unilever、Yamaha、L'Oréal、Kraft、小松"
+    "入驻企业行业：电子、汽车、餐饮食品、制药、消费品 —— Mattel、Samsung、Unilever、Yamaha、L'Oréal、Kraft、小松"
   ],
 
   "landing.members.title": "我们邀请的会员",
@@ -82,14 +82,14 @@
   "engine.4.t": "方案",
   "engine.4.b": "范围、可行性、投资规模、项目结构",
   "engine.5.t": "决策",
-  "engine.5.b": "由你自行决定是否推进 —— 加入俱乐部本身不构成任何承诺",
+  "engine.5.b": "按你的条件推进 —— 加入俱乐部本身不构成任何承诺",
 
   "landing.vision.title": "我们一起造这艘正在航行的船 —— 一次一个样板。",
   "landing.vision.body": "俱乐部是早期探索性平台。最终结果取决于每位会员自身的尽职调查、审批与协议。",
   "landing.vision.tagline": "进入印尼 · 共同探索 · 自主决策",
 
   "footer.disclaimer": "仅供信息参考。俱乐部是早期探索性平台，最终结果取决于每位会员自身的尽职调查、审批与协议。前瞻性陈述不构成对未来业绩的保证。不构成任何要约、招揽、项目中标或投资回报的暗示或承诺。© 2026 百城俱乐部（100 Cities Club）。",
-  "footer.signin": "合作方登录",
+  "footer.signin": "合作伙伴登录",
 
   "login.title": "登录百城俱乐部",
   "login.username": "用户名",

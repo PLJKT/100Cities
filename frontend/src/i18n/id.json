@@ -4,7 +4,7 @@
 
   "topbar.signin": "Masuk",
 
-  "landing.hero.motto": "Building a ship while sailing",
+  "landing.hero.motto": "Membangun kapal di tengah pelayaran",
   "landing.hero.subtitle": "Indonesia adalah ekonomi terbesar di Asia Tenggara dan satu-satunya anggota ASEAN di G20. Terbesar ke-16 dunia berdasarkan GDP nominal (~US$1,5 triliun) dan ke-8 berdasarkan PPP (~US$5,4 triliun), dengan 287 juta penduduk. Dekade ke depan akan ditentukan oleh urbanisasi: kota-kota baru, pusat industri baru, dan kawasan permukiman yang menciptakan lapangan kerja, membina talenta, serta mengangkat ekonomi daerah. 100 Cities Club adalah inisiatif privat berbasis undangan yang digagas oleh PT Kawasan Industri Jababeka Tbk (IDX: KIJA) — perintis pengembang kota mandiri dan kawasan industri di Indonesia — untuk memimpin upaya nasional ini. Tujuannya mendukung pembangunan 100 kota di seluruh Indonesia, bersama pemerintah pusat dan daerah, wirausahawan Indonesia, dan modal global.",
   "landing.cred.lead": "100 Cities Club terhubung dengan pengembang kota mandiri Indonesia PT Kawasan Industri Jababeka Tbk (IDX: KIJA). KIJA membawa pengalaman lebih dari 35 tahun membangun kota terpadu, kawasan industri, kelistrikan, air, pelabuhan darat, universitas, dan rumah sakit pendidikan; Club membuka playbook itu — dan Indonesia itu sendiri — bagi mitra global: produsen, investor, penyedia teknologi, pengembang, serta institusi pendidikan dan kesehatan.",
 
@@ -18,19 +18,19 @@
   "segment.water": "Air & Kawasan",
   "segment.dryport": "Dry Port",
   "landing.cred.list": [
-    { "n": "1989", "l": "Berdiri · Developer kawasan industri pertama di Indonesia (IPO 1994, IDX: KIJA)" },
+    { "n": "1989", "l": "Berdiri · Developer kawasan industri pertama yang tercatat di bursa Indonesia (IPO 1994, IDX: KIJA)" },
     { "n": "5.089 ha", "l": "Land bank strategis di 4 kawasan" },
     { "n": "2.000+", "l": "Perusahaan dari 34 negara beroperasi di Jababeka" },
     { "n": "3 KEK", "l": "Kendal, Tanjung Lesung, Morotai — status Kawasan Ekonomi Khusus" },
     { "n": "2 juta+", "l": "Lapangan kerja langsung & tidak langsung di Indonesia" }
   ],
 
-  "landing.track.title": "Jejak Jejak",
+  "landing.track.title": "Rekam Jejak",
   "landing.track.bullets": [
     "Kota Jababeka — kota terpadu matang, dihuni 1,2 juta penduduk dan 730.000+ tenaga kerja",
     "Satu-satunya kawasan industri di Indonesia dengan pembangkit listrik sendiri (130 MW Bekasi Power)",
     "Cikarang Dry Port (IDJBK) — pelabuhan dalam negeri terintegrasi bea-cukai, karantina & logistik pertama",
-    "Kendal Industrial Park dibuka Nov 2016 oleh Presiden RI dan PM Singapura",
+    "Kendal Industrial Park dibuka Nov 2016 oleh Presiden RI dan Perdana Menteri Singapura",
     "Kendal dinilai Best New Industrial Park 2023 oleh Kemenperin; Jababeka juara PropertyGuru Asia 2020"
   ],
 
@@ -62,33 +62,33 @@
 
   "landing.members.title": "Anggota yang Kami Undang",
   "member.t1.t": "Penjelajah pertama kali",
-  "member.t1.b": "Mencari landing, mitra lokal, situs referensi",
+  "member.t1.b": "Mencari tempat pendaratan usaha, mitra lokal, dan studi banding",
   "member.t2.t": "Produsen & kontraktor",
   "member.t2.b": "Mempertimbangkan relokasi kapasitas, pabrik atau proyek",
   "member.t3.t": "Pemasok teknologi",
-  "member.t3.b": "Smart manufacturing, energi terbarukan, medtech, AI",
+  "member.t3.b": "Manufaktur cerdas, energi terbarukan, teknologi medis, AI",
   "member.t4.t": "Perusahaan yang sudah di Indonesia",
   "member.t4.b": "Mencari pelanggan, proyek, situs ekspansi",
   "member.t5.t": "Investor",
-  "member.t5.b": "Terbuka untuk uji coba RE industri, infrastruktur, kesehatan, perhotelan",
+  "member.t5.b": "Terbuka untuk uji coba properti industri, infrastruktur, kesehatan, perhotelan",
 
   "landing.engine.title": "Bagaimana Sebuah Proyek Berjalan",
   "engine.1.t": "Perkenalan & Intake",
-  "engine.1.b": "Ceritakan bisnis, produk, dan niat Anda",
+  "engine.1.b": "Bagikan informasi bisnis, produk, dan tujuan Anda",
   "engine.2.t": "Pencocokan Awal",
   "engine.2.b": "Tim luar negeri mengusulkan arah; tim Indonesia verifikasi lokasi",
   "engine.3.t": "Kunjungan Situs",
-  "engine.3.b": "Bergabung dengan delegasi, bertemu tim bisnis Jababeka",
+  "engine.3.b": "Bergabunglah dengan delegasi dan bertemu tim bisnis Jababeka",
   "engine.4.t": "Proposal",
   "engine.4.b": "Lingkup, kelayakan, ukuran investasi, struktur proyek",
   "engine.5.t": "Keputusan",
   "engine.5.b": "Lanjutkan sesuai syarat Anda sendiri — bergabung bukan komitmen",
 
-  "landing.vision.title": "Kita membangun kapal yang sedang berlayar bersama — satu prototipe demi satu.",
+  "landing.vision.title": "Kita membangun kapal di tengah pelayarannya bersama — satu prototipe demi satu.",
   "landing.vision.body": "Klub ini adalah platform eksplorasi tahap awal. Hasil akhir bergantung pada due diligence, izin, dan perjanjian masing-masing anggota.",
   "landing.vision.tagline": "Masuk Indonesia · Jelajah bersama · Putuskan sendiri",
 
-  "footer.disclaimer": "Untuk informasi saja. Klub ini adalah platform eksplorasi tahap awal; hasil akhir bergantung pada due diligence, izin, dan perjanjian masing-masing anggota. Pernyataan berwawasan ke depan bukan jaminan kinerja masa depan. Tidak ada penawaran, penunjukan proyek, atau imbal hasil yang tersirat atau dijanjikan. © 2026 100 Cities Club.",
+  "footer.disclaimer": "Untuk informasi saja. Klub ini adalah platform eksplorasi tahap awal; hasil akhir bergantung pada due diligence, izin, dan perjanjian masing-masing anggota. Pernyataan berwawasan ke depan bukan jaminan kinerja masa depan. Tidak ada penawaran, ajakan investasi, penunjukan proyek, atau imbal hasil yang tersirat atau dijanjikan. © 2026 100 Cities Club.",
   "footer.signin": "Masuk Mitra",
 
   "login.title": "Masuk ke 100 Cities Club",
@@ -110,13 +110,13 @@
   "form.fill": "Isi Formulir Phase1",
   "form.draft": "Simpan draf",
   "form.submit": "Kirim",
-  "form.submit.confirm": "Setelah dikirim, record terkunci read-only dan lampiran dikemas di memori.",
+  "form.submit.confirm": "Setelah dikirim, catatan terkunci hanya-baca dan lampiran dikemas di memori.",
   "form.upload": "Unggah lampiran (di memori, tidak disimpan)",
   "review.approve": "Setujui",
   "review.reject": "Tolak",
   "review.remind": "Pengingat",
   "review.remark": "Catatan",
-  "dash.progress": "Kemajuan",
+  "dash.progress": "Kemajuan Proyek",
   "dash.overdue": "Terlambat",
   "dash.completion": "Penyelesaian",
   "export.excel": "Ekspor Excel",
