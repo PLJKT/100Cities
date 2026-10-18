@@ -18,7 +18,7 @@
   "segment.water": "水务与园区",
   "segment.dryport": "内陆港",
   "landing.cred.list": [
-    { "n": "1989", "l": "创立 · 印尼首家工业园区开发商（1994 年 IPO 上市，代码 KIJA）" },
+    { "n": "1989", "l": "创立 · 印尼首家工业园区开发商（1994 年 IPO，代码 KIJA）" },
     { "n": "5,089 公顷", "l": "跨 4 个园区的战略土地储备" },
     { "n": "2,000+", "l": "来自 34 个国家、入驻 Jababeka 的企业" },
     { "n": "3 个 SEZ", "l": "肯达尔、丹绒勒松、摩罗泰 —— 均为国家级经济特区" },
@@ -27,8 +27,8 @@
 
   "landing.track.title": "过往实绩",
   "landing.track.bullets": [
-    "芝加朗 Jababeka 城 —— 成熟一体化新城，120 万居民、73 万+劳动力",
-    "印尼唯一自带自备电厂的工业园区（130 MW Bekasi Power）",
+    "Cikarang Jababeka 城 —— 成熟一体化新城，120 万居民、73 万+劳动力",
+    "印尼唯一拥有自备电厂的工业园区（130 MW Bekasi Power）",
     "芝加朗内陆港（IDJBK）—— 印尼首个集海关、检疫、物流一体的内陆港",
     "肯达尔工业园于 2016 年 11 月由时任印尼总统与时任新加坡总理共同主持开幕",
     "肯达尔获 2023 年工业部最佳新工业园；Jababeka 获 2020 PropertyGuru 亚洲最佳工业地产开发商"
@@ -51,7 +51,7 @@
     "组织赴 Jababeka 实地考察团"
   ],
 
-  "landing.flag.title": "旗舰园区：芝加朗 Jababeka 城",
+  "landing.flag.title": "旗舰园区：Cikarang Jababeka 城",
   "landing.flag.bullets": [
     "130 MW 燃气电厂 · 2011 年 2 月与国家电力公司签 20 年包销协议",
     "Cikarang 内陆港 200 公顷 · 保税物流 · 承担 Tanjung Priok 走廊约 62% 吞吐",
