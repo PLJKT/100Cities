@@ -68,6 +68,20 @@ npm run dev          # http://localhost:5173, /api 代理到 8080
 - **阶段 1（当前）**：GitHub 私有仓库 + GitHub Actions CI + GitHub Pages 前端预览，后端本地/临时容器跑 SQLite。
 - **阶段 2（百城规模化）**：前端 Nginx 独立域名 + 后端云服务器 + MySQL；代码、表单、权限、接口全部复用，无需重构。
 
+## 当前落地页（Landing `/`，免登录）
+
+公开门户内容为三语（EN / ID / ZH），结构自上而下：
+
+1. **Hero** — 印尼世界级经济地位（G20 唯一东盟成员、名义 GDP 全球第 16、PPP 第 8、2.87 亿人口）+ 百城俱乐部作为 KIJA 发起的邀请制平台、联合政府/本土企业家/全球资本共建 100 城的愿景。
+2. **Who We Are Working With** — KIJA 35+ 年综合城区/工业园/电力/水务/干港/大学/医院经验，开放给全球伙伴；配 Jababeka 园区横版 banner 与 5 项可信度数字。
+3. **Track Record** — 左：园区实绩 bullet；右：KIJA 8 大业务板块彩色矩阵（Real Estate / Industrial / Residential / Commercial / Infrastructure / Power / Water & Estate / Dry Port，标签随语言切换）。
+4. **Dual Core** — 印尼侧能力 × 全球合作方需求两栏。
+5. **Members** — 5 类邀请对象同一行排列（首次出海考察者 / 制造商与承包商 / 技术供应商 / 已在印尼企业 / 投资者）。
+6. **How a Project Typically Moves** — 5 步水平流程图（Intake → Matching → Site Visit → Proposal → Decision）。
+7. **Vision + Sign-in** + 页脚免责声明（© 2026 100 Cities Club）。
+
+> 前端当前以 **MOCK 模式**独立运行：`frontend/.env.development` 中 `VITE_USE_MOCK=true`，任意账号可登录，后端无需启动。待后端接口就绪后切回 `false`。
+
 ## 角色矩阵
 
 | 角色 | 登录 | 表单填报 | 审核 | Dashboard 明细 | Dashboard 汇总 | 对外门户 | 用户/角色/表单配置 |
