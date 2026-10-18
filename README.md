@@ -65,22 +65,28 @@ npm run dev          # http://localhost:5173, /api 代理到 8080
 
 ## 部署阶段
 
-- **阶段 1（当前）**：GitHub 私有仓库 + GitHub Actions CI + GitHub Pages 前端预览，后端本地/临时容器跑 SQLite。
+- **阶段 1（当前）**：GitHub **公开仓库** + GitHub Actions CI + GitHub Pages（Source = GitHub Actions）自动部署，后端本地/临时容器跑 SQLite。
+  - 线上地址：https://pljkt.github.io/100Cities/
+  - `vite.config.ts` 设置 `base: '/100Cities/'`，路由 `basename={import.meta.env.BASE_URL}`，`dist/404.html` 做 SPA fallback。
+  - 每次 `git push origin main` 自动重新构建并部署到 Pages。
 - **阶段 2（百城规模化）**：前端 Nginx 独立域名 + 后端云服务器 + MySQL；代码、表单、权限、接口全部复用，无需重构。
 
 ## 当前落地页（Landing `/`，免登录）
 
 公开门户内容为三语（EN / ID / ZH），结构自上而下：
 
-1. **Hero** — 印尼世界级经济地位（G20 唯一东盟成员、名义 GDP 全球第 16、PPP 第 8、2.87 亿人口）+ 百城俱乐部作为 KIJA 发起的邀请制平台、联合政府/本土企业家/全球资本共建 100 城的愿景。
-2. **Who We Are Working With** — KIJA 35+ 年综合城区/工业园/电力/水务/干港/大学/医院经验，开放给全球伙伴；配 Jababeka 园区横版 banner 与 5 项可信度数字。
-3. **Track Record** — 左：园区实绩 bullet；右：KIJA 8 大业务板块彩色矩阵（Real Estate / Industrial / Residential / Commercial / Infrastructure / Power / Water & Estate / Dry Port，标签随语言切换）。
-4. **Dual Core** — 印尼侧能力 × 全球合作方需求两栏。
-5. **Members** — 5 类邀请对象同一行排列（首次出海考察者 / 制造商与承包商 / 技术供应商 / 已在印尼企业 / 投资者）。
-6. **How a Project Typically Moves** — 5 步水平流程图（Intake → Matching → Site Visit → Proposal → Decision）。
-7. **Vision + Sign-in** + 页脚免责声明（© 2026 100 Cities Club）。
+1. **Top bar** — 圆形徽章 logo + "100 CITIES CLUB" 标题（`clamp()` 自适应字号，窄屏 flex-wrap 防止语言按钮覆盖）+ 三语切换 + Sign In。
+2. **Hero** — 印尼世界级经济地位（G20 唯一东盟成员、名义 GDP 全球第 16、PPP 第 8、2.87 亿人口）+ 百城俱乐部作为 KIJA 发起的邀请制平台、联合政府/本土企业家/全球资本共建 100 城的愿景；背景为金色印尼地图（`mix-blend-mode: screen`）。
+3. **Who We Are Working With** — KIJA 35+ 年综合城区/工业园/电力/水务/干港/大学/医院经验，开放给全球伙伴；配 Jababeka 园区横版 banner 与 5 项可信度数字。
+4. **Track Record** — 左：园区实绩 bullet；右：KIJA 8 大业务板块彩色矩阵（Real Estate / Industrial / Residential / Commercial / Infrastructure / Power / Water & Estate / Dry Port，标签随语言切换）。
+5. **Dual Core** — 印尼侧能力 × 全球合作方需求两栏。
+6. **Members** — 5 类邀请对象同一行排列（首次出海考察者 / 制造商与承包商 / 技术供应商 / 已在印尼企业 / 投资者），`clamp()` 自适应字号 + 断词规则。
+7. **How a Project Typically Moves** — 5 步水平流程图（Intake → Matching → Site Visit → Proposal → Decision），整行排列，移动端不换行。
+8. **Vision + Sign-in** + 页脚免责声明（© 2026 100 Cities Club，包含 early-stage / 不承诺 / no-offer 三段合规语）。
 
 > 前端当前以 **MOCK 模式**独立运行：`frontend/.env.development` 中 `VITE_USE_MOCK=true`，任意账号可登录，后端无需启动。待后端接口就绪后切回 `false`。
+>
+> **响应式设计约定**：所有标题/正文/卡片文字使用 `clamp(min, vw, max)` 自适应字号；业务板块和会员卡片加 `word-break: break-word; overflow-wrap: anywhere`，杜绝长词截断；窄屏导航 `flex-wrap` 自动换行。
 
 ## 角色矩阵
 
