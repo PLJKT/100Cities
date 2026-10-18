@@ -130,15 +130,15 @@ export default function Landing() {
       <div style={{
         position: 'sticky', top: 0, zIndex: 10,
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        padding: '10px 16px', background: 'rgba(255,255,255,0.97)',
-        borderBottom: '1px solid #ececec', gap: 10,
+        padding: '8px 12px', background: 'rgba(255,255,255,0.97)',
+        borderBottom: '1px solid #ececec', gap: 8,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-          <ClubLogo size={40} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+          <ClubLogo size={32} />
           <span style={{
             fontWeight: 800,
-            fontSize: 'clamp(14px, 4.2vw, 26px)',
-            letterSpacing: 1,
+            fontSize: 'clamp(10px, 3.4vw, 26px)',
+            letterSpacing: 0.5,
             color: '#1a1a1a',
             fontFamily: "'Archivo Black','Montserrat','Helvetica Neue',Arial,sans-serif",
             lineHeight: 1,
@@ -147,9 +147,9 @@ export default function Landing() {
             100 CITIES CLUB
           </span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
           <LangSwitcher />
-          <Button type="primary" size="middle"
+          <Button type="primary" size="small"
             style={{ background: '#0f4d3a', borderColor: '#0f4d3a', fontWeight: 600 }}
             onClick={() => nav('/login')}>
             {t('topbar.signin')}
