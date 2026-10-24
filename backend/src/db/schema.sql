@@ -171,6 +171,7 @@ CREATE TABLE IF NOT EXISTS form_field (
 
 -- 项目管道：五步流转（intake→matching→site_visit→proposal→decision）
 -- v3：同时支持关联 partner_profile 或 lead（渠道录入的潜在客户审核流）
+-- v4：entered_at 记录阶段进入时间（支持 time-in-stage 统计）
 CREATE TABLE IF NOT EXISTS pipeline (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   partner_id  INTEGER REFERENCES partner_profile(id),
@@ -178,6 +179,7 @@ CREATE TABLE IF NOT EXISTS pipeline (
   submit_id   INTEGER REFERENCES form_submit(id),
   stage       TEXT NOT NULL DEFAULT 'intake',
   stage_note  TEXT,
+  entered_at  TEXT NOT NULL DEFAULT (datetime('now')),  -- v4：当前阶段进入时间
   updated_by  INTEGER,
   updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
@@ -240,6 +242,7 @@ INSERT OR IGNORE INTO form_field (id, template_id, field_key, field_type, requir
 -- ============================================================
 
 -- 资产：Jababeka 可合作资产清单与说明（前端资产页面展示）
+-- v4：载体建档——面积/价格/关键参数/联系人，支持考察匹配
 CREATE TABLE IF NOT EXISTS asset (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   name        TEXT NOT NULL,
@@ -248,6 +251,12 @@ CREATE TABLE IF NOT EXISTS asset (
   size_desc   TEXT,
   description TEXT,
   status      TEXT NOT NULL DEFAULT 'available',   -- available/reserved/leased/planning
+  price_desc  TEXT,           -- v4：价格/租金说明（可按需定制）
+  min_area    TEXT,           -- v4：可租售最小面积
+  max_area    TEXT,           -- v4：可租售最大面积
+  key_specs   TEXT,           -- v4：关键参数（配电/层高/承重/设施）
+  owner_contact TEXT,         -- v4：联系人（姓名/邮箱/电话）
+  image_url   TEXT,           -- v4：展示图
   sort        INTEGER NOT NULL DEFAULT 0,
   enabled     INTEGER NOT NULL DEFAULT 1,
   created_at  TEXT NOT NULL DEFAULT (datetime('now')),
@@ -255,6 +264,7 @@ CREATE TABLE IF NOT EXISTS asset (
 );
 
 -- 潜在客户：渠道合作方录入（行业/规模/诉求），进入审核流
+-- v4：线索台账——预计投资额/负责人/下一步行动/跟进时间/优先级
 CREATE TABLE IF NOT EXISTS lead (
   id               INTEGER PRIMARY KEY AUTOINCREMENT,
   channel_user_id  INTEGER NOT NULL REFERENCES sys_user(id),
@@ -267,43 +277,119 @@ CREATE TABLE IF NOT EXISTS lead (
   contact_email    TEXT,
   source_channel   TEXT DEFAULT 'direct',
   status           TEXT NOT NULL DEFAULT 'new',  -- new/under_review/approved/rejected/converted
+  estimated_value  TEXT,                -- v4：预计投资额（USD/IDR 说明）
+  priority         TEXT DEFAULT 'normal', -- v4：low/normal/high/urgent
+  assigned_to      INTEGER REFERENCES sys_user(id), -- v4：负责人
+  next_action      TEXT,                -- v4：下一步行动
+  next_follow_at   TEXT,                -- v4：下次跟进时间
   created_at       TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at       TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- 线索跟进台账（v4：谁在跟/跟到哪/何时回访，换人不丢进度）
+CREATE TABLE IF NOT EXISTS lead_followup (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  lead_id    INTEGER NOT NULL REFERENCES lead(id) ON DELETE CASCADE,
+  action     TEXT NOT NULL,             -- 跟进动作（call/email/meeting/site_visit/note）
+  note       TEXT,
+  follow_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  user_id    INTEGER,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- 项目：会员合作项目信息与进度说明
+-- v4：里程碑/进度百分比/预计完成/关联资产
 CREATE TABLE IF NOT EXISTS project (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
   lead_id       INTEGER REFERENCES lead(id),
   member_id     INTEGER REFERENCES partner_profile(id),
+  asset_id      INTEGER REFERENCES asset(id),  -- v4：关联资产
   name          TEXT NOT NULL,
   description   TEXT,
   stage         TEXT NOT NULL DEFAULT 'intake',  -- 复用五步 intake/matching/site_visit/proposal/decision
+  progress_pct  INTEGER DEFAULT 0,    -- v4：进度百分比 0-100
   progress_note TEXT,
+  estimated_value TEXT,               -- v4：预计投资额
+  expected_close TEXT,                -- v4：预计完成/交割时间
   status        TEXT NOT NULL DEFAULT 'active',  -- active/paused/completed
   started_at    TEXT,
   created_at    TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- ---------- 默认资产种子（8 大业务板块，与落地页矩阵一致） ----------
-INSERT OR IGNORE INTO asset (id, name, category, location, size_desc, description, status, sort) VALUES
+-- 项目里程碑（v4）
+CREATE TABLE IF NOT EXISTS project_milestone (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL REFERENCES project(id) ON DELETE CASCADE,
+  name       TEXT NOT NULL,
+  due_date   TEXT,
+  status     TEXT NOT NULL DEFAULT 'pending',  -- pending/in_progress/done
+  note       TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- 已存在库的种子行补充 v4 建档字段（幂等：每次启动更新，值固定）
+UPDATE asset SET
+  price_desc = CASE id
+    WHEN 1 THEN 'From IDR 2.5M/m², HGB 30+20 years'
+    WHEN 2 THEN 'On application (SEZ incentives: tax holiday 10–15 yrs)'
+    WHEN 3 THEN 'On application' WHEN 4 THEN 'On application'
+    WHEN 5 THEN 'PPA/offtake on application' WHEN 6 THEN 'Service/land lease on application'
+    WHEN 7 THEN 'Utility tariffs per PAM/PLN benchmark' WHEN 8 THEN 'Partnership/JV on application'
+  END,
+  min_area = CASE id WHEN 1 THEN '2,000 m²' WHEN 2 THEN '5,000 m²' WHEN 3 THEN '10,000 m²' WHEN 4 THEN '10,000 m²' END,
+  max_area = CASE id WHEN 1 THEN '50,000 m²' WHEN 2 THEN '100,000 m²' WHEN 3 THEN '200,000 m²' WHEN 4 THEN '150,000 m²' END,
+  key_specs = CASE id
+    WHEN 1 THEN '3-phase power to plot, 6m road grid, 20m main arteries, water & fiber available'
+    WHEN 2 THEN 'SEZ incentives, deep-water port access via Semarang, dedicated power'
+    WHEN 3 THEN 'Beachfront resort land, MICE venues, airport proximity'
+    WHEN 4 THEN 'Fisheries/logistics incentives, island port access'
+    WHEN 5 THEN '130 MW capacity, own-grid, 24/7 reliability'
+    WHEN 6 THEN 'Customs bonded zone, rail & road connectivity, 1M TEU capacity'
+    WHEN 7 THEN 'Treated water, wastewater, fiber, estate security'
+    WHEN 8 THEN 'President University (4,000+ students), 250-bed teaching hospital'
+  END,
+  owner_contact = CASE id
+    WHEN 1 THEN 'Ms. Febiyanti — febiyanti@jababeka.com'
+    WHEN 2 THEN 'Juliani Kusumaningrum — juliani.kusumaningrum@kik.co.id'
+    WHEN 3 THEN 'Jababeka Investor Desk' WHEN 4 THEN 'Jababeka Investor Desk'
+    WHEN 5 THEN 'Jababeka Utilities Division' WHEN 6 THEN 'Jababeka Port Division'
+    WHEN 7 THEN 'Jababeka Utilities Division' WHEN 8 THEN 'Jababeka Education & Health Division'
+  END
+WHERE id BETWEEN 1 AND 8 AND enabled = 1;
+INSERT OR IGNORE INTO asset (id, name, category, location, size_desc, description, status, price_desc, min_area, max_area, key_specs, owner_contact, sort) VALUES
   (1, 'Cikarang Jababeka City – Industrial Plots', 'industrial', 'Cikarang, West Java', '~2,000 ha developed',
-   'Indonesia''s pioneer township & industrial estate since 1989. Ready-to-build factory plots, road grid, power, water and dry port inside the estate.', 'available', 1),
+   'Indonesia''s pioneer township & industrial estate since 1989. Ready-to-build factory plots, road grid, power, water and dry port inside the estate.', 'available',
+   'From IDR 2.5M/m², HGB 30+20 years', '2,000 m²', '50,000 m²',
+   '3-phase power to plot, 6m road grid, 20m main arteries, water & fiber available', 'Ms. Febiyanti — febiyanti@jababeka.com', 1),
   (2, 'Kendal Industrial Park', 'industrial', 'Kendal, Central Java', '~2,200 ha SEZ',
-   'Jointly opened Nov 2016 by the President of Indonesia and the Prime Minister of Singapore. Ideal for export-oriented manufacturers.', 'available', 2),
+   'Jointly opened Nov 2016 by the President of Indonesia and the Prime Minister of Singapore. Ideal for export-oriented manufacturers.', 'available',
+   'On application (SEZ incentives: tax holiday 10–15 yrs)', '5,000 m²', '100,000 m²',
+   'SEZ incentives, deep-water port access via Semarang, dedicated power', 'Juliani Kusumaningrum — juliani.kusumaningrum@kik.co.id', 2),
   (3, 'Tanjung Lesung SEZ', 'sez', 'Pandeglang, Banten', '~1,500 ha',
-   'Tourism & MICE special economic zone on the Sunda Strait coast, with international hotel operators and resort land.', 'planning', 3),
+   'Tourism & MICE special economic zone on the Sunda Strait coast, with international hotel operators and resort land.', 'planning',
+   'On application', '10,000 m²', '200,000 m²',
+   'Beachfront resort land, MICE venues, airport proximity', 'Jababeka Investor Desk', 3),
   (4, 'Morotai SEZ', 'sez', 'Morotai, North Maluku', '~800 ha',
-   'Island logistics & fisheries hub SEZ in eastern Indonesia, part of the national growth corridor.', 'planning', 4),
+   'Island logistics & fisheries hub SEZ in eastern Indonesia, part of the national growth corridor.', 'planning',
+   'On application', '10,000 m²', '150,000 m²',
+   'Fisheries/logistics incentives, island port access', 'Jababeka Investor Desk', 4),
   (5, 'Jababeka Gas-Fired Power Plant', 'power', 'Cikarang, West Java', '130 MW',
-   'Captive gas-fired power supporting estate industries with stable, own-grid electricity supply.', 'available', 5),
+   'Captive gas-fired power supporting estate industries with stable, own-grid electricity supply.', 'available',
+   'PPA/offtake on application', null, null,
+   '130 MW capacity, own-grid, 24/7 reliability', 'Jababeka Utilities Division', 5),
   (6, 'Jababeka Dry Port (CTC)', 'dryport', 'Cikarang, West Java', '~200 ha',
-   'Integrated container terminal & customs facility inside the estate, connecting to Tanjung Priok and Tanjung Perak.', 'available', 6),
+   'Integrated container terminal & customs facility inside the estate, connecting to Tanjung Priok and Tanjung Perak.', 'available',
+   'Service/land lease on application', null, null,
+   'Customs bonded zone, rail & road connectivity, 1M TEU capacity', 'Jababeka Port Division', 6),
   (7, 'Water Treatment & Estate Utilities', 'water', 'Cikarang, West Java', 'multiple plants',
-   'Water treatment, wastewater and estate-wide utilities serving 1.2M residents and 2,000+ factories.', 'available', 7),
+   'Water treatment, wastewater and estate-wide utilities serving 1.2M residents and 2,000+ factories.', 'available',
+   'Utility tariffs per PAM/PLN benchmark', null, null,
+   'Treated water, wastewater, fiber, estate security', 'Jababeka Utilities Division', 7),
   (8, 'Jababeka University & Teaching Hospital', 'education', 'Cikarang, West Java', 'campus + hospital',
-   'President University and Jababeka Hospital – education & healthcare anchors for talent and community life.', 'available', 8);
+   'President University and Jababeka Hospital – education & healthcare anchors for talent and community life.', 'available',
+   'Partnership/JV on application', null, null,
+   'President University (4,000+ students), 250-bed teaching hospital', 'Jababeka Education & Health Division', 8);
 
 -- ---------- 示例潜在客户（演示审核流） ----------
 INSERT OR IGNORE INTO lead (id, channel_user_id, company_name, industry, company_size, need_description, contact_name, contact_phone, contact_email, source_channel, status) VALUES

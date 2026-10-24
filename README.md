@@ -75,6 +75,27 @@ npm run dev          # http://localhost:5173, /api 代理到 8080
 
 默认 Phase1 模板已种子 7 字段：partner_name / entity_nationality / asset_summary / qualifications / cooperation_intent(select,5 选项) / target_segment(multiselect,7 板块) / attachments(file)。
 
+## 后端 v4 能力（已实现）
+
+> v3 六功能之上，结合园区招商系统 + CRM 管道 + Jababeka 官网调研完成详细化：资产建档/考察匹配、线索台账、加权管道、项目里程碑、Dashboard 待办与漏斗。本地 :8080 冒烟 **29/29** 通过。
+
+| 模块 | 接口 | 说明 |
+|---|---|---|
+| 资产建档 + 考察匹配 | `GET /api/assets/:id`、`POST /api/assets/match` | **v4**：资产增加 price_desc/min_area/max_area/key_specs/owner_contact/image_url；按行业/规模/面积需求推荐匹配资产（match_score 排序） |
+| 线索台账（Lead） | `GET /api/leads/:id`、`POST /:id/followups`、`PUT /:id`、`GET /stats` | **v4**：预计投资额/优先级/负责人/下一步行动/下次跟进时间；跟进台账 lead_followup（call/email/meeting/site_visit/note）；统计按来源/行业/规模/优先级/周趋势/五步漏斗；列表支持 status/industry/source/priority/关键词筛选 |
+| 加权管道价值 | `/api/dashboard/summary#pipeline` | **v4**：Σ(预计投资额 × 阶段概率 intake 10%→decision 90%)；pipeline 记录 entered_at 支持 time-in-stage 统计 |
+| 项目里程碑 | `GET /api/projects/:id`、`POST /:id/milestones`、`PUT/DELETE /milestones/:mid` | **v4**：项目增加 asset_id/progress_pct(0-100)/estimated_value/expected_close；里程碑表（name/due_date/status/note） |
+| Dashboard 待办与监控 | `/api/dashboard/summary#todos` | **v4**：待审核潜客数、7 天内需跟进数、超期提交数、进行中项目数；资产占用率（reserved+leased/total）；潜客周趋势/来源/行业分布；项目平均进度 |
+| 审核五步流转 | `GET/PUT /api/leads/:id/pipeline` | 每阶段记录 entered_at（停留时长可算）；decision 阶段自动同步 lead=approved |
+| 字段级动态模板 | `GET/POST /api/admin/templates`、`PUT /:id/fields` | Admin 维护字段（类型/必填/排序/三语标签/选项） |
+| 企业档案（会员资料） | `GET/POST /api/partners`、`GET /my` | tier 五类、status 状态机；合作方仅可改自己 |
+| SMTP 配置 + 通知 | `GET/PUT /api/admin/settings/email`、`notification` 表 | DB 优先、env 兜底；邮件/WA 留痕 |
+| WhatsApp 适配器 | `notify.service#sendWhatsAppNotification` | 路线 B：mock+日志，默认接收号 `WA_TO=+6281513198596` |
+
+**v4 数据库迁移**：`db.ts#runMigrations` 启动时先迁移再执行 schema；pipeline 重建时临时 `foreign_keys=OFF` 并**连带重建 pipeline_event**（SQLite RENAME 总会改写引用方外键，legacy_alter_table 对外键无效——已实测验证）；asset/lead/project 缺列自动 ALTER 补充。
+
+默认 Phase1 模板已种子 7 字段：partner_name / entity_nationality / asset_summary / qualifications / cooperation_intent(select,5 选项) / target_segment(multiselect,7 板块) / attachments(file)。
+
 ## 核心安全 / 合规约定
 
 1. **文件零落盘**：附件仅 Stream 内存处理，打包推邮件后销毁；不写磁盘、不入 DB。
