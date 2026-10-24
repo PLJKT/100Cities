@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>100Cities Backend Pocket Console</title>
+<style>
+  :root{
+    --bg:#0e0e10; --panel:#17171b; --panel2:#1e1e24; --line:#2a2a32;
+    --gold:#d4a94e; --gold2:#e8c476; --text:#e8e6e0; --muted:#9a968c;
+    --ok:#3fb27f; --err:#e05555; --warn:#d9a441;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font:14px/1.55 -apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif;padding:20px 14px 60px}
+  .wrap{max-width:960px;margin:0 auto}
+  header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:18px}
+  .logo{width:46px;height:46px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;flex:none}
+  .logo span{font-weight:800;color:var(--gold);font-size:16px;letter-spacing:1px}
+  h1{font-size:20px;letter-spacing:.5px}
+  .sub{color:var(--muted);font-size:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+  .card h2{font-size:14px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .card h2::before{content:"";width:4px;height:14px;background:var(--gold);border-radius:2px}
+  .row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px dashed var(--line);flex-wrap:wrap}
+  .row:first-of-type{border-top:none}
+  .method{font-weight:700;font-size:11px;padding:3px 8px;border-radius:6px;flex:none;min-width:52px;text-align:center}
+  .m-get{background:#1d3a33;color:#57d9a5}.m-post{background:#33406b;color:#9db4ff}.m-put{background:#5c4521;color:#f2c879}.m-delete{background:#5c2525;color:#ff9d9d}
+  .path{font-family:Consolas,Menlo,monospace;font-size:12.5px;color:var(--text);word-break:break-all;flex:1;min-width:180px}
+  .desc{color:var(--muted);font-size:12px;width:100%;padding-left:70px;margin-top:-4px}
+  .params{width:100%;display:none;flex-direction:column;gap:8px;padding-left:70px}
+  .row.open .params{display:flex}
+  .params label{font-size:11px;color:var(--muted)}
+  input[type=text],input[type=password],input[type=url],textarea{background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 10px;font-size:13px;width:100%;font-family:inherit}
+  textarea{resize:vertical;min-height:56px;font-family:Consolas,Menlo,monospace;font-size:12px}
+  .btn{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:7px 14px;font-size:12.5px;cursor:pointer;transition:.15s}
+  .btn:hover{border-color:var(--gold);color:var(--gold)}
+  .btn.gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#141414;font-weight:700;border:none}
+  .btn.gold:hover{filter:brightness(1.08);color:#141414}
+  .btn.sm{padding:4px 10px;font-size:11.5px}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .result{width:100%;background:#0a0a0c;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:Consolas,Menlo,monospace;font-size:12px;white-space:pre-wrap;word-break:break-all;max-height:260px;overflow:auto;display:none}
+  .result.show{display:block}
+  .result .st{font-weight:700;margin-bottom:6px}
+  .st-2xx{color:var(--ok)} .st-3xx{color:var(--warn)} .st-4xx,.st-5xx{color:var(--err)}
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  .toolbar input{flex:1;min-width:220px}
+  .tag{font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid var(--line);color:var(--muted)}
+  .tag.tok{color:var(--ok);border-color:var(--ok)}
+  .userline{font-size:12px;color:var(--muted)}
+  .expander{color:var(--muted);font-size:12px;cursor:pointer;user-select:none}
+  .expander:hover{color:var(--gold)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  footer{margin-top:24px;text-align:center;color:var(--muted);font-size:12px}
+  @media(max-width:640px){
+    .desc,.params{padding-left:0}
+    .grid2{grid-template-columns:1fr}
+    .row{align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo"><span>100</span></div>
+    <div>
+      <h1>100Cities · Backend Pocket Console</h1>
+      <div class="sub">Postcard-style API tester · base URL + token saved in this browser</div>
+    </div>
+  </header>
+
+  <!-- base url -->
+  <div class="card">
+    <div class="toolbar">
+      <input id="baseUrl" type="url" placeholder="http://localhost:8080" value="">
+      <button class="btn gold" id="saveBase">Save Base URL</button>
+      <button class="btn" id="resetBase">Reset</button>
+      <span class="tag" id="baseTag">not saved</span>
+    </div>
+    <div class="sub">Local: <code>http://localhost:8080</code> · Tunnel: <code>https://xxxx.loca.lt</code> · Mobile LAN: <code>http://192.168.0.100:8080</code></div>
+  </div>
+
+  <!-- auth -->
+  <div class="card">
+    <h2>Authentication</h2>
+    <div class="grid2">
+      <input id="username" type="text" placeholder="username" value="admin">
+      <input id="password" type="password" placeholder="password" value="ChangeMe!2026">
+    </div>
+    <div class="row">
+      <span class="method m-post">POST</span><span class="path">/api/auth/login</span>
+      <button class="btn gold sm" data-act="auth">Login &amp; Save Token</button>
+      <button class="btn sm" data-act="logout">Clear Token</button>
+      <span class="tag" id="tokTag">no token</span>
+    </div>
+    <div class="row">
+      <span class="method m-get">GET</span><span class="path">/api/auth/me</span>
+      <button class="btn sm" data-act="me">Test</button>
+    </div>
+    <div id="authOut" class="userline" style="padding-left:70px"></div>
+  </div>
+
+  <!-- basics -->
+  <div class="card">
+    <h2>Basics</h2>
+    <div class="row">
+      <span class="method m-get">GET</span><span class="path">/api/health</span>
+      <button class="btn sm" data-act="t" data-url="/api/health">Test</button>
+    </div>
+    <div class="row">
+      <span class="method m-get">GET</span><span class="path">/api/public/project?lang=</span>
+      <button class="btn sm" data-act="t" data-url="/api/public/project?lang=en">Test</button>
+      <span class="expander" data-expand="lang">params…</span>
+      <div class="params" id="lang"><label>lang</label><input type="text" value="en" data-param="lang" placeholder="en / id / zh"></div>
+    </div>
+    <div class="row">
+      <span class="method m-get">GET</span><span class="path">/api/public/invest</span>
+      <button class="btn sm" data-act="t" data-url="/api/public/invest">Test</button>
+    </div>
+  </div>
+
+  <!-- admin users -->
+  <div class="card">
+    <h2>Admin · Users</h2>
+    <div class="row">
+      <span class="method m-get">GET</span><span class="path">/api/admin/users</span>
+      <button class="btn sm" data-act="t" data-url="/api/admin/users">Test</button>
+    </div>
+    <div class="row">
+      <span class="method m-post">POST</span><span class="path">/api/admin/users</span>
+      <button class="btn sm" data-act="t" data-url="/api/admin/users">Test</button>
+      <span class="expander" data-expand="u1">params…</span>
+      <div class="params" id="u1"><label>body (JSON)</label><textarea data-body>{"username":"demo_partner","password":"Passw0rd!","role_id":2,"partner_name":"Demo Partner"}</textarea></div>
+    </div>
+  </div>
+
+  <!-- admin templates -->
+  <div class="card">
+    <h2>Admin · Templates &amp; Settings</h2>
+    <div class="row">
+      <span class="method m-get">GET</span><span class="path">/api/admin/templates</span>
+      <button class="btn sm" data-act="t" data-url="/api/admin/templates">Test</button>
+    </div>
+    <div class="row">
+      <span class="method m-get">GET</span><span class="path">/api/admin/settings/email</span>
+      <button class="btn sm" data-act="t" data-url="/api/admin/settings/email">Test</button>
+    </div>
+    <div class="row">
+      <span class="method m-put">PUT</span><span class="path">/api/admin/settings/email</span>
+      <button class="btn sm" data-act="t" data-url="/api/admin/settings/email">Test</button>
+      <span class="expander" data-expand="smtp">params…</span>
+      <div class="params" id="smtp"><label>body (JSON)</label><textarea data-body>{"host":"smtp.gmail.com","port":587,"secure":false,"user":"your@gmail.com","pass":"app-password","to_addr":"ops@example.com"}</textarea></div>
+    </div>
+  </div>
+
+  <!-- partner forms -->
+  <div class="card">
+    <h2>Partner · Form (Phase1)</h2>
+    <div class="row">
+      <span class="method m-get">GET</span><span class="path">/api/forms/phase1</span>
+      <button class="btn sm" data-act="t" data-url="/api/forms/phase1">Test</button>
+    </div>
+    <div class="row">
+      <span class="method m-get">GET</span><span class="path">/api/forms/my/submits</span>
+      <button class="btn sm" data-act="t" data-url="/api/forms/my/submits">Test</button>
+    </div>
+    <div class="row">
+      <span class="method m-post">POST</span><span class="path">/api/forms/submit</span>
+      <button class="btn sm" data-act="t" data-url="/api/forms/submit">Test</button>
+      <span class="expander" data-expand="sub">params…</span>
+      <div class="params" id="sub"><label>data (JSON)</label><textarea data-body>{"partner_name":"Demo Partner Co","entity_nationality":"SG","asset_summary":"Factory 30k sqm","cooperation_intent":"market_entry","target_segment":["industrial","power"]}</textarea></div>
+    </div>
+  </div>
+
+  <!-- partner profile & pipeline -->
+  <div class="card">
+    <h2>Partner · Profile / Pipeline</h2>
+    <div class="row">
+      <span class="method m-get">GET</span><span class="path">/api/partners/my</span>
+      <button class="btn sm" data-act="t" data-url="/api/partners/my">Test</button>
+    </div>
+    <div class="row">
+      <span class="method m-get">GET</span><span class="path">/api/partners</span>
+      <button class="btn sm" data-act="t" data-url="/api/partners">Test</button>
+    </div>
+    <div class="row">
+      <span class="method m-get">GET</span><span class="path">/api/partners/:id/pipeline</span>
+      <button class="btn sm" data-act="t" data-url="/api/partners">Test</button>
+      <span class="expander" data-expand="pp">params…</span>
+      <div class="params" id="pp"><label>partner id (replace :id)</label><input type="text" data-pathpart="id" value="1"></div>
+    </div>
+  </div>
+
+  <!-- review -->
+  <div class="card">
+    <h2>Review</h2>
+    <div class="row">
+      <span class="method m-get">GET</span><span class="path">/api/review/submits</span>
+      <button class="btn sm" data-act="t" data-url="/api/review/submits">Test</button>
+    </div>
+    <div class="row">
+      <span class="method m-post">POST</span><span class="path">/api/review/:id/approve</span>
+      <button class="btn sm" data-act="t" data-url="/api/review/1/approve">Test</button>
+    </div>
+    <div class="row">
+      <span class="method m-post">POST</span><span class="path">/api/review/:id/reject</span>
+      <button class="btn sm" data-act="t" data-url="/api/review/1/reject">Test</button>
+      <span class="expander" data-expand="rj">params…</span>
+      <div class="params" id="rj"><label>body (JSON)</label><textarea data-body>{"remark":"Please add asset location details."}</textarea></div>
+    </div>
+  </div>
+
+  <!-- dashboard & export -->
+  <div class="card">
+    <h2>Dashboard &amp; Export</h2>
+    <div class="row">
+      <span class="method m-get">GET</span><span class="path">/api/dashboard/summary</span>
+      <button class="btn sm" data-act="t" data-url="/api/dashboard/summary">Test</button>
+    </div>
+    <div class="row">
+      <span class="method m-get">GET</span><span class="path">/api/dashboard/detail</span>
+      <button class="btn sm" data-act="t" data-url="/api/dashboard/detail">Test</button>
+    </div>
+    <div class="row">
+      <span class="method m-get">GET</span><span class="path">/api/export/excel?lang=en</span>
+      <button class="btn sm" data-act="dl" data-url="/api/export/excel?lang=en">Download</button>
+    </div>
+    <div class="row">
+      <span class="method m-get">GET</span><span class="path">/api/export/pdf?lang=en</span>
+      <button class="btn sm" data-act="dl" data-url="/api/export/pdf?lang=en">Download</button>
+    </div>
+  </div>
+
+  <footer>© 2026 100 Cities Club · Backend Pocket Console · token &amp; base URL stay in this browser only</footer>
+</div>
+
+<script>
+(function(){
+  const LS_BASE='100c_base', LS_TOK='100c_tok', LS_USER='100c_user';
+  const $=s=>document.querySelector(s);
+  const baseInput=$('#baseUrl'), tokTag=$('#tokTag'), baseTag=$('#baseTag');
+
+  function load(){
+    const b=localStorage.getItem(LS_BASE);
+    if(b){ baseInput.value=b; baseTag.textContent='saved'; baseTag.style.borderColor='var(--ok)'; baseTag.style.color='var(--ok)'; }
+    else baseTag.textContent='not saved';
+    const t=localStorage.getItem(LS_TOK);
+    if(t){ tokTag.textContent='token ✓'; tokTag.classList.add('tok'); }
+  }
+  function base(){ return (baseInput.value||'').replace(/\/+$/,''); }
+
+  $('#saveBase').onclick=()=>{ if(!baseInput.value){alert('Enter a base URL first');return;} localStorage.setItem(LS_BASE,baseInput.value.trim()); baseTag.textContent='saved ✓'; baseTag.style.borderColor='var(--ok)'; baseTag.style.color='var(--ok)'; };
+  $('#resetBase').onclick=()=>{ localStorage.removeItem(LS_BASE); baseInput.value='http://localhost:8080'; baseTag.textContent='reset'; baseTag.style.borderColor=''; baseTag.style.color=''; };
+
+  function tok(){ return localStorage.getItem(LS_TOK)||''; }
+
+  // auth login
+  $('[data-act="auth"]').onclick=async()=>{
+    const u=$('#username').value.trim(), p=$('#password').value;
+    const res=await send('/api/auth/login',{method:'POST',body:JSON.stringify({username:u,password:p}),json:true,noTok:true});
+    if(res.ok && res.data.token){
+      localStorage.setItem(LS_TOK,res.data.token);
+      localStorage.setItem(LS_USER,JSON.stringify(res.data.user||{}));
+      tokTag.textContent='token ✓'; tokTag.classList.add('tok');
+      $('#authOut').innerHTML='<span style="color:var(--ok)">Logged in as '+res.data.user.username+' · role '+res.data.user.role_name+'</span>';
+    } else {
+      $('#authOut').innerHTML='<span style="color:var(--err)">Login failed</span>';
+    }
+  };
+  $('[data-act="logout"]').onclick=()=>{ localStorage.removeItem(LS_TOK); localStorage.removeItem(LS_USER); tokTag.textContent='no token'; tokTag.classList.remove('tok'); $('#authOut').innerHTML=''; };
+  $('[data-act="me"]').onclick=()=>{ send('/api/auth/me',{method:'GET'}); };
+
+  // expanders
+  document.querySelectorAll('[data-expand]').forEach(x=>{
+    x.onclick=()=>{ const p=$('#'+x.dataset.expand); p.style.display = p.style.display==='flex' ? 'none' : 'flex'; x.textContent = p.style.display==='flex' ? 'hide…' : 'params…'; };
+  });
+
+  // generic test
+  document.querySelectorAll('[data-act="t"]').forEach(btn=>{
+    btn.onclick=async()=>{
+      const raw=btn.dataset.url;
+      let url=raw;
+      // apply :id path parts
+      const row=btn.closest('.row');
+      if(row){ row.querySelectorAll('[data-pathpart]').forEach(pp=>{ url=url.replace(':'+pp.dataset.pathpart, encodeURIComponent(pp.value||'')); }); }
+      // query params
+      const params=row?row.querySelector('[data-param]'):null;
+      if(params && params.value){ url += (url.includes('?')?'&':'?')+params.dataset.param+'='+encodeURIComponent(params.value); }
+      // body
+      const bodyEl=row?row.querySelector('[data-body]'):null;
+      const method=(btn.closest('.row').querySelector('.method').textContent||'GET').trim();
+      const body=bodyEl?bodyEl.value:null;
+      await send(url,{method,body:body?body:undefined});
+    };
+  });
+
+  // download (excel/pdf)
+  document.querySelectorAll('[data-act="dl"]').forEach(btn=>{
+    btn.onclick=()=>{
+      const url=base()+btn.dataset.url;
+      fetch(url,{headers:{Authorization:'Bearer '+tok()}}).then(r=>{
+        if(!r.ok){ alert('HTTP '+r.status); return; }
+        r.blob().then(b=>{
+          const a=document.createElement('a');
+          a.href=URL.createObjectURL(b);
+          a.download=(btn.dataset.url.match(/[^/?]+$/)?.[0]||'download');
+          a.click(); URL.revokeObjectURL(a.href);
+        });
+      }).catch(e=>alert('Network error: '+e.message));
+    };
+  });
+
+  async function send(url,opt){
+    opt=opt||{};
+    const showErr=(msg)=>{ const o=$('#authOut'); o.innerHTML='<span style="color:var(--err)">'+msg+'</span>'; };
+    if(!base()){ showErr('Base URL not set'); return {ok:false}; }
+    const full=base()+url;
+    const headers={};
+    if(!opt.noTok && tok()) headers['Authorization']='Bearer '+tok();
+    if(opt.json||opt.body) headers['Content-Type']='application/json';
+    try{
+      const res=await fetch(full,{method:opt.method||'GET',headers,body:opt.body});
+      const ct=res.headers.get('content-type')||'';
+      const data=ct.includes('json')?await res.json():await res.text();
+      const result=(opt.noTok)?(opt.showOut||null):outFor(res,data);
+      if(opt.noTok) return {ok:res.ok,data,res};
+      const btn=document.querySelector('[data-act="t"]:last-of-type')||document.createElement('button');
+      // fallback: locate closest row button
+      return {ok:res.ok,data,res};
+    }catch(e){
+      showErr('Network error: '+e.message);
+      return {ok:false};
+    }
+  }
+
+  function outFor(res,data){
+    const btn=document.activeElement;
+    const row=btn?btn.closest('.row'):null;
+    if(!row) return;
+    let r=row.querySelector('.result');
+    if(!r){ r=document.createElement('div'); r.className='result'; row.appendChild(r); }
+    const cls=res.ok? (res.status<300?'st-2xx':'st-3xx') : (res.status<500?'st-4xx':'st-5xx');
+    const text=typeof data==='string'?data:JSON.stringify(data,null,2);
+    r.innerHTML='<div class="st '+cls+'">HTTP '+res.status+' '+(res.statusText||'')+' · '+(res.ok?'✓':'✗')+'</div>';
+    const pre=document.createElement('pre'); pre.style.margin='0'; pre.textContent=text;
+    r.appendChild(pre);
+    r.classList.add('show');
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>
