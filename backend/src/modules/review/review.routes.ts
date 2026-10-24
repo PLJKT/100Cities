@@ -46,9 +46,9 @@ r.post('/:id/reject', authRequired, requirePerm('review'), async (req: AuthedReq
   }
   writeLog(req.user!.uid, 'review.reject', 'form_submit', Number(req.params.id), { remark });
   if (row?.email) {
-    sendRejectNotification({ lang: pickLang(req), to: row.email, docNo: row.doc_no, remark: remark || '' }).catch(() => {});
+    sendRejectNotification({ lang: pickLang(req), to: row.email, docNo: row.doc_no, remark: remark || '', refId: Number(req.params.id) }).catch(() => {});
   }
-  sendWhatsAppNotification({ text: `Submission ${req.params.id} needs correction: ${remark}` }).catch(() => {});
+  sendWhatsAppNotification({ text: `Submission ${req.params.id} needs correction: ${remark}`, refType: 'form_submit', refId: Number(req.params.id) }).catch(() => {});
   res.json({ ok: true });
 });
 

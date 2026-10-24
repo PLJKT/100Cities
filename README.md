@@ -9,7 +9,7 @@
 
 - 资源方：KIJA
 - 合作方：生态合作方（如总统大学）/ 第三方服务方 / 申请入驻方（印尼、新加坡、中国主体）
-- 业务闭环：Admin 建号 → 合作方登录填表传附件 → 提交时后端内存打包附件 → 推送指定工作邮箱 + WhatsApp 提醒 → 内存流销毁 → 文本入 DB 并锁定只读 → 审核员通过/退回（邮件+WA 通知）→ 7 天催报 / 60 天停催 → Dashboard + 一键导出（Excel/PDF/ZIP/协议附件，跟随前端语种）。
+- 业务闭环：Admin 建号 → 合作方完善企业档案 → 按动态模板填 Phase1 → 提交时后端内存打包附件 → 推送指定工作邮箱 + WhatsApp 提醒 → 内存流销毁 → 文本入 DB 并锁定只读 → 审核员通过/退回（邮件+WA 通知）→ pipeline 五步流转（Intake→Matching→Site Visit→Proposal→Decision）→ 7 天催报 / 60 天停催 → Dashboard + 一键导出（Excel/PDF/ZIP/协议附件，跟随前端语种）。
 
 ## 技术栈
 
@@ -54,6 +54,19 @@ npm run dev          # http://localhost:5173, /api 代理到 8080
 
 首次启动后端会自动建表并写入初始 Super Admin（用户名 `admin`，密码见后端启动日志，**首次登录后立即改密**）。
 
+## 后端 v2 能力（已实现）
+
+| 模块 | 接口 | 说明 |
+|---|---|---|
+| 字段级动态模板 | `GET/POST /api/admin/templates`、`PUT /:id/fields`、`DELETE /:id/fields/:fid` | Admin 可视化维护字段（text/textarea/number/select/multiselect/file、必填、排序、三语标签、选项）；填报端 `GET /api/forms/:templateKey` 只返回 `enabled=1` 的字段 |
+| 企业档案 | `GET/POST /api/partners`、`PUT /:id`、`GET /my` | 与 sys_user 一对一；tier 五类（explorer/manufacturer/tech/existing/investor）、status 状态机（invited/active/paused）；合作方仅可改自己 |
+| Pipeline 五步流转 | `GET /:id/pipeline`、`PUT /:id/pipeline` | intake→matching→site_visit→proposal→decision，自动建 pipeline、全量事件流留痕（pipeline_event），Admin/Reviewer 可推进 |
+| SMTP 配置表 | `GET/PUT /api/admin/settings/email` | `email_settings` 表（id=1）DB 优先、env 兜底；后台随时切换 Gmail/企业邮箱；占位符（example/yourmail 等）自动视为未配置 |
+| 通知记录 | `notification` 表 | 邮件/WA 每次发送留痕（pending/sent/failed + error + 重试计数），供后台审计 |
+| WhatsApp 适配器 | `notify.service#sendWhatsAppNotification` | **路线 B（当前）**：`WA_API_URL` 未配置时 mock+日志，默认接收号 `WA_TO=+6281513198596`；接官方 Business Cloud API 后替换实现即可，调用方不变 |
+
+默认 Phase1 模板已种子 7 字段：partner_name / entity_nationality / asset_summary / qualifications / cooperation_intent(select,5 选项) / target_segment(multiselect,7 板块) / attachments(file)。
+
 ## 核心安全 / 合规约定
 
 1. **文件零落盘**：附件仅 Stream 内存处理，打包推邮件后销毁；不写磁盘、不入 DB。
@@ -90,13 +103,13 @@ npm run dev          # http://localhost:5173, /api 代理到 8080
 
 ## 角色矩阵
 
-| 角色 | 登录 | 表单填报 | 审核 | Dashboard 明细 | Dashboard 汇总 | 对外门户 | 用户/角色/表单配置 |
-|---|---|---|---|---|---|---|---|
-| Super Admin | ✅ | ✅ | ✅ | ✅ | ✅ | 浏览 | ✅ |
-| 合作方填报员 | ✅ | ✅（仅本人）| ❌ | ❌ | ❌ | 浏览 | ❌ |
-| 内部审核管理员 | ✅ | ❌ | ✅ | ✅ | ✅ | 浏览 | ❌ |
-| BOD 只读 | ✅ | ❌ | ❌ | ❌ | ✅ | 浏览 | ❌ |
-| 访客 | 免登 | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| 角色 | 登录 | 表单填报 | 审核 | Pipeline 流转 | Dashboard 明细 | Dashboard 汇总 | 对外门户 | 用户/角色/模板/SMTP 配置 |
+|---|---|---|---|---|---|---|---|---|---|
+| Super Admin | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 浏览 | ✅ |
+| 合作方填报员 | ✅ | ✅（仅本人）| ❌ | 仅查看自己 | ❌ | ❌ | 浏览 | ❌ |
+| 内部审核管理员 | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | 浏览 | ❌ |
+| BOD 只读 | ✅ | ❌ | ❌ | 仅查看 | ❌ | ✅ | 浏览 | ❌ |
+| 访客 | 免登 | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
 
 ## License
 

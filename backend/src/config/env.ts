@@ -24,6 +24,7 @@ export const env = {
   WA_API_URL: process.env.WA_API_URL || '',
   WA_TOKEN: process.env.WA_TOKEN || '',
   WA_FROM: process.env.WA_FROM || '',
+  WA_TO: process.env.WA_TO || '+6281513198596',
 
   DEFAULT_LANG: process.env.DEFAULT_LANG || 'en',
   REMIND_EVERY_DAYS: Number(process.env.REMIND_EVERY_DAYS || 7),

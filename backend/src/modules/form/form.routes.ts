@@ -30,7 +30,11 @@ r.get('/:templateKey', authRequired, (req: AuthedRequest, res) => {
     .prepare(`SELECT * FROM form_template WHERE template_key=?`)
     .get(req.params.templateKey) as any;
   if (!row) return res.status(404).json({ error: { message: 'template not found' } });
-  res.json({ ...row, section_config: JSON.parse(row.section_config) });
+  const fields = getDb()
+    .prepare(`SELECT * FROM form_field WHERE template_id=? AND enabled=1 ORDER BY sort, id`)
+    .all(row.id)
+    .map((f: any) => ({ ...f, options: f.options ? JSON.parse(f.options) : null }));
+  res.json({ ...row, section_config: JSON.parse(row.section_config || '{}'), fields });
 });
 
 /** 草稿不存档（业务约束），仅回显 */

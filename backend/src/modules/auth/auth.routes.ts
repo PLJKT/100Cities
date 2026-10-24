@@ -16,6 +16,9 @@ r.post('/login', (req, res) => {
     return res.status(401).json({ error: { message: 'invalid credentials' } });
   }
   const token = signToken({ uid: row.id, username: row.username, role_id: row.role_id });
+  const profile = getDb()
+    .prepare(`SELECT id, company_name, nationality, industry, tier, status, contact_email, contact_phone FROM partner_profile WHERE user_id=?`)
+    .get(row.id) || null;
   writeLog(row.id, 'login', 'sys_user', row.id, { ip: req.ip });
   res.json({
     token,
@@ -25,6 +28,7 @@ r.post('/login', (req, res) => {
       partner_name: row.partner_name,
       role_name: row.role_name,
       menu_permissions: JSON.parse(row.menu_permissions || '[]'),
+      profile,
     },
   });
 });

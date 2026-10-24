@@ -6,6 +6,8 @@ import authRoutes from './modules/auth/auth.routes';
 import userRoutes from './modules/user/user.routes';
 import roleRoutes from './modules/role/role.routes';
 import templateRoutes from './modules/template/template.routes';
+import partnerRoutes from './modules/partner/partner.routes';
+import settingsRoutes from './modules/settings/settings.routes';
 import formRoutes from './modules/form/form.routes';
 import reviewRoutes from './modules/review/review.routes';
 import exportRoutes from './modules/export/export.routes';
@@ -24,6 +26,8 @@ export function createApp() {
   app.use('/api/admin/users', userRoutes);
   app.use('/api/admin/roles', roleRoutes);
   app.use('/api/admin/templates', templateRoutes);
+  app.use('/api/partners', partnerRoutes);
+  app.use('/api/admin/settings', settingsRoutes);
   app.use('/api/forms', formRoutes);
   app.use('/api/review', reviewRoutes);
   app.use('/api/export', exportRoutes);
