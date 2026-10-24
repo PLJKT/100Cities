@@ -54,7 +54,28 @@ async function mockHandler(config: InternalAxiosRequestConfig) {
       profile: { id: 1, company_name: 'PT Kawasan Industri Jababeka Tbk', nationality: 'ID', tier: 'existing', status: 'active' },
     };
   } else if (method === 'get' && url === '/dashboard/summary') {
+    // 与后端 /api/dashboard/summary v3 结构一致
     data.total = 24; data.approved = 12; data.overdue = 2; data.progress = 50; data.completion = 50;
+    data.submits = { total: 24, approved: 12, overdue: 2, progress: 50 };
+    data.assets = {
+      total: 8,
+      byCategory: { industrial: 2, sez: 2, power: 1, dryport: 1, water: 1, education: 1 },
+      byStatus: { available: 6, planning: 2 },
+    };
+    data.leads = {
+      total: 5,
+      byStatus: { new: 1, under_review: 2, approved: 1, rejected: 1 },
+    };
+    data.projects = {
+      total: 3,
+      byStage: { intake: 1, matching: 1, site_visit: 1 },
+      byStatus: { active: 2, completed: 1 },
+    };
+    data.partners = {
+      total: 12,
+      byTier: { explorer: 3, manufacturer: 4, tech: 2, existing: 2, investor: 1 },
+    };
+    data.pipeline = { byStage: { intake: 1, matching: 1, site_visit: 2, proposal: 1 }, totalEvents: 14 };
   } else if (method === 'get' && url === '/dashboard/detail') {
     data = [
       { id: 1, doc_no: 'P1-MVMBIXNC-3', partner_name: 'Test Partner Co', status: 'pending', submit_time: '2026-10-24 09:12' },

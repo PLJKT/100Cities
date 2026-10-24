@@ -66,6 +66,7 @@ npm run dev          # http://localhost:5173, /api 代理到 8080
 | **渠道录入（潜在客户）** | `POST /api/leads`、`GET /api/leads`、`GET /my`、`PUT /:id/status` | **v3 新增**：渠道方录入潜在客户（行业/规模/诉求/联系人/来源渠道），仅看自己（/my 隔离，列表需 review 权限）；审核可改状态 new→under_review→approved/rejected/converted |
 | **审核五步流转（关联 Lead）** | `GET /:id/pipeline`、`PUT /:id/pipeline` | **v3 扩展**：pipeline 增加 lead_id 关联（partner_id 兼容保留）；渠道录入即自动建 intake，推进时同步 lead 状态；全量事件留痕 pipeline_event；Admin/Reviewer 推进、渠道方可见自己 |
 | **项目进度（会员合作项目）** | `GET /api/projects`、`GET /my`、`POST`、`PUT /:id` | **v3 新增**：会员合作项目（关联 lead + 会员档案）；阶段复用五步、progress_note 自由进度说明、status active/paused/completed；返回自动 enrich lead/会员信息 |
+| **Dashboard 关键指标** | `GET /api/dashboard/summary` | **v3 扩展**：除提交统计外新增资产（总数/按板块/按状态）、潜客（总数/按状态）、项目（总数/按阶段/按状态）、会员（总数/按 tier）、pipeline（按阶段/事件数）全量关键指标，供 Dashboard 指标卡+六图展示 |
 | SMTP 配置表 | `GET/PUT /api/admin/settings/email` | `email_settings` 表（id=1）DB 优先、env 兜底；后台随时切换 Gmail/企业邮箱；占位符（example/yourmail 等）自动视为未配置 |
 | 通知记录 | `notification` 表 | 邮件/WA 每次发送留痕（pending/sent/failed + error + 重试计数），供后台审计 |
 | WhatsApp 适配器 | `notify.service#sendWhatsAppNotification` | **路线 B（当前）**：`WA_API_URL` 未配置时 mock+日志，默认接收号 `WA_TO=+6281513198596`；接官方 Business Cloud API 后替换实现即可，调用方不变 |
