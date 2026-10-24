@@ -97,7 +97,10 @@ npm run dev          # http://localhost:5173, /api 代理到 8080
 7. **How a Project Typically Moves** — 5 步水平流程图（Intake → Matching → Site Visit → Proposal → Decision），整行排列，移动端不换行。
 8. **Vision + Sign-in** + 页脚免责声明（© 2026 100 Cities Club，包含 early-stage / 不承诺 / no-offer 三段合规语）。
 
-> 前端当前以 **MOCK 模式**独立运行：`frontend/.env.development` 中 `VITE_USE_MOCK=true`，任意账号可登录，后端无需启动。待后端接口就绪后切回 `false`。
+> 前端当前以 **MOCK 模式**独立运行：
+> - 本地开发：`frontend/.env.development` 中 `VITE_USE_MOCK=true`，任意账号可登录，后端无需启动。
+> - 线上 Pages：`frontend/.env.production` 同样 `VITE_USE_MOCK=true`，因此 GitHub Pages 上**所有页面（登录 / Dashboard / 填报 / 审核 / 管理）都渲染完整排版与演示数据**，可直接浏览。
+> - 后端部署到云端后，将两处 `VITE_USE_MOCK` 改为 `false` 并配置真实 base URL 即可切回。
 >
 > **响应式设计约定**：所有标题/正文/卡片文字使用 `clamp(min, vw, max)` 自适应字号；业务板块和会员卡片加 `word-break: break-word; overflow-wrap: anywhere`，杜绝长词截断；窄屏导航 `flex-wrap` 自动换行。
 
