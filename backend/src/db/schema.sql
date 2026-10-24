@@ -170,9 +170,11 @@ CREATE TABLE IF NOT EXISTS form_field (
 );
 
 -- 项目管道：五步流转（intake→matching→site_visit→proposal→decision）
+-- v3：同时支持关联 partner_profile 或 lead（渠道录入的潜在客户审核流）
 CREATE TABLE IF NOT EXISTS pipeline (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
-  partner_id  INTEGER NOT NULL REFERENCES partner_profile(id),
+  partner_id  INTEGER REFERENCES partner_profile(id),
+  lead_id     INTEGER REFERENCES lead(id),
   submit_id   INTEGER REFERENCES form_submit(id),
   stage       TEXT NOT NULL DEFAULT 'intake',
   stage_note  TEXT,
@@ -232,3 +234,83 @@ INSERT OR IGNORE INTO form_field (id, template_id, field_key, field_type, requir
   (6, 1, 'target_segment',     'multiselect', 0, 6, 'Target Segment', 'Segmen Sasaran', '目标板块',
     '[{"value":"industrial","en":"Industrial","id":"Industri","zh":"工业"},{"value":"residential","en":"Residential","id":"Perumahan","zh":"住宅"},{"value":"commercial","en":"Commercial","id":"Komersial","zh":"商业"},{"value":"infra","en":"Infrastructure","id":"Infrastruktur","zh":"基础设施"},{"value":"power","en":"Power","id":"Ketenagalistrikan","zh":"电力"},{"value":"water","en":"Water & Estate","id":"Air & Kawasan","zh":"水务与园区"},{"value":"dryport","en":"Dry Port","id":"Dry Port","zh":"内陆港"}]'),
   (7, 1, 'attachments',        'file',     0, 7, 'Attachments', 'Lampiran', '附件', NULL);
+
+-- ============================================================
+-- v3 — 资产（JB 可合作资产）/ 潜在客户（渠道录入）/ 项目（会员合作进度）
+-- ============================================================
+
+-- 资产：Jababeka 可合作资产清单与说明（前端资产页面展示）
+CREATE TABLE IF NOT EXISTS asset (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  name        TEXT NOT NULL,
+  category    TEXT NOT NULL DEFAULT 'industrial',  -- industrial/residential/commercial/power/water/dryport/sez/infra/education
+  location    TEXT,
+  size_desc   TEXT,
+  description TEXT,
+  status      TEXT NOT NULL DEFAULT 'available',   -- available/reserved/leased/planning
+  sort        INTEGER NOT NULL DEFAULT 0,
+  enabled     INTEGER NOT NULL DEFAULT 1,
+  created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- 潜在客户：渠道合作方录入（行业/规模/诉求），进入审核流
+CREATE TABLE IF NOT EXISTS lead (
+  id               INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel_user_id  INTEGER NOT NULL REFERENCES sys_user(id),
+  company_name     TEXT NOT NULL,
+  industry         TEXT,
+  company_size     TEXT DEFAULT 'SME',  -- SME / Mid / Large / Enterprise
+  need_description TEXT,                -- 诉求
+  contact_name     TEXT,
+  contact_phone    TEXT,
+  contact_email    TEXT,
+  source_channel   TEXT DEFAULT 'direct',
+  status           TEXT NOT NULL DEFAULT 'new',  -- new/under_review/approved/rejected/converted
+  created_at       TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at       TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- 项目：会员合作项目信息与进度说明
+CREATE TABLE IF NOT EXISTS project (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  lead_id       INTEGER REFERENCES lead(id),
+  member_id     INTEGER REFERENCES partner_profile(id),
+  name          TEXT NOT NULL,
+  description   TEXT,
+  stage         TEXT NOT NULL DEFAULT 'intake',  -- 复用五步 intake/matching/site_visit/proposal/decision
+  progress_note TEXT,
+  status        TEXT NOT NULL DEFAULT 'active',  -- active/paused/completed
+  started_at    TEXT,
+  created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- ---------- 默认资产种子（8 大业务板块，与落地页矩阵一致） ----------
+INSERT OR IGNORE INTO asset (id, name, category, location, size_desc, description, status, sort) VALUES
+  (1, 'Cikarang Jababeka City – Industrial Plots', 'industrial', 'Cikarang, West Java', '~2,000 ha developed',
+   'Indonesia''s pioneer township & industrial estate since 1989. Ready-to-build factory plots, road grid, power, water and dry port inside the estate.', 'available', 1),
+  (2, 'Kendal Industrial Park', 'industrial', 'Kendal, Central Java', '~2,200 ha SEZ',
+   'Jointly opened Nov 2016 by the President of Indonesia and the Prime Minister of Singapore. Ideal for export-oriented manufacturers.', 'available', 2),
+  (3, 'Tanjung Lesung SEZ', 'sez', 'Pandeglang, Banten', '~1,500 ha',
+   'Tourism & MICE special economic zone on the Sunda Strait coast, with international hotel operators and resort land.', 'planning', 3),
+  (4, 'Morotai SEZ', 'sez', 'Morotai, North Maluku', '~800 ha',
+   'Island logistics & fisheries hub SEZ in eastern Indonesia, part of the national growth corridor.', 'planning', 4),
+  (5, 'Jababeka Gas-Fired Power Plant', 'power', 'Cikarang, West Java', '130 MW',
+   'Captive gas-fired power supporting estate industries with stable, own-grid electricity supply.', 'available', 5),
+  (6, 'Jababeka Dry Port (CTC)', 'dryport', 'Cikarang, West Java', '~200 ha',
+   'Integrated container terminal & customs facility inside the estate, connecting to Tanjung Priok and Tanjung Perak.', 'available', 6),
+  (7, 'Water Treatment & Estate Utilities', 'water', 'Cikarang, West Java', 'multiple plants',
+   'Water treatment, wastewater and estate-wide utilities serving 1.2M residents and 2,000+ factories.', 'available', 7),
+  (8, 'Jababeka University & Teaching Hospital', 'education', 'Cikarang, West Java', 'campus + hospital',
+   'President University and Jababeka Hospital – education & healthcare anchors for talent and community life.', 'available', 8);
+
+-- ---------- 示例潜在客户（演示审核流） ----------
+INSERT OR IGNORE INTO lead (id, channel_user_id, company_name, industry, company_size, need_description, contact_name, contact_phone, contact_email, source_channel, status) VALUES
+  (1, 1, 'Hangzhou GreenTech Co., Ltd.', 'Renewable Energy', 'Mid', 'Looking for 5–10 ha industrial land in Java to set up solar module assembly and export to ASEAN.',
+   'Mr. Chen Wei', '+86 571 8888 6666', 'chen.wei@greentech.example', 'Singapore Chamber Intro', 'under_review');
+
+-- ---------- 示例项目（演示进度页） ----------
+INSERT OR IGNORE INTO project (id, lead_id, member_id, name, description, stage, progress_note, status, started_at) VALUES
+  (1, 1, 1, 'GreenTech Solar Module Plant – Cikarang', 'Solar module assembly plant on Cikarang industrial plot A7, targeting 2027 COD.',
+   'site_visit', 'Site visit completed Nov 2026; land allocation draft under review.', 'active', '2026-10-05');

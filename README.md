@@ -54,16 +54,23 @@ npm run dev          # http://localhost:5173, /api 代理到 8080
 
 首次启动后端会自动建表并写入初始 Super Admin（用户名 `admin`，密码见后端启动日志，**首次登录后立即改密**）。
 
-## 后端 v2 能力（已实现）
+## 后端 v3 能力（已实现）
+
+> 六大功能落地：登录权限、资产页、渠道录入、审核流、会员资料、项目进度。本地 :8080 全链路冒烟 23/23 通过。
 
 | 模块 | 接口 | 说明 |
 |---|---|---|
 | 字段级动态模板 | `GET/POST /api/admin/templates`、`PUT /:id/fields`、`DELETE /:id/fields/:fid` | Admin 可视化维护字段（text/textarea/number/select/multiselect/file、必填、排序、三语标签、选项）；填报端 `GET /api/forms/:templateKey` 只返回 `enabled=1` 的字段 |
-| 企业档案 | `GET/POST /api/partners`、`PUT /:id`、`GET /my` | 与 sys_user 一对一；tier 五类（explorer/manufacturer/tech/existing/investor）、status 状态机（invited/active/paused）；合作方仅可改自己 |
-| Pipeline 五步流转 | `GET /:id/pipeline`、`PUT /:id/pipeline` | intake→matching→site_visit→proposal→decision，自动建 pipeline、全量事件流留痕（pipeline_event），Admin/Reviewer 可推进 |
+| 企业档案（会员资料） | `GET/POST /api/partners`、`PUT /:id`、`GET /my` | 与 sys_user 一对一；tier 五类（explorer/manufacturer/tech/existing/investor）、status 状态机（invited/active/paused）；合作方仅可改自己 |
+| **资产清单（JB 可合作资产）** | `GET /api/assets`、`GET /category/:cat`、`POST/PUT/DELETE` | **v3 新增**：8 大业务板块种子（工业地块/Kendal/Tanjung Lesung/Morotai/电厂/干港/水务/教育与医院）；登录可见、Super Admin 维护（admin.assets），软删 enabled=0 |
+| **渠道录入（潜在客户）** | `POST /api/leads`、`GET /api/leads`、`GET /my`、`PUT /:id/status` | **v3 新增**：渠道方录入潜在客户（行业/规模/诉求/联系人/来源渠道），仅看自己（/my 隔离，列表需 review 权限）；审核可改状态 new→under_review→approved/rejected/converted |
+| **审核五步流转（关联 Lead）** | `GET /:id/pipeline`、`PUT /:id/pipeline` | **v3 扩展**：pipeline 增加 lead_id 关联（partner_id 兼容保留）；渠道录入即自动建 intake，推进时同步 lead 状态；全量事件留痕 pipeline_event；Admin/Reviewer 推进、渠道方可见自己 |
+| **项目进度（会员合作项目）** | `GET /api/projects`、`GET /my`、`POST`、`PUT /:id` | **v3 新增**：会员合作项目（关联 lead + 会员档案）；阶段复用五步、progress_note 自由进度说明、status active/paused/completed；返回自动 enrich lead/会员信息 |
 | SMTP 配置表 | `GET/PUT /api/admin/settings/email` | `email_settings` 表（id=1）DB 优先、env 兜底；后台随时切换 Gmail/企业邮箱；占位符（example/yourmail 等）自动视为未配置 |
 | 通知记录 | `notification` 表 | 邮件/WA 每次发送留痕（pending/sent/failed + error + 重试计数），供后台审计 |
 | WhatsApp 适配器 | `notify.service#sendWhatsAppNotification` | **路线 B（当前）**：`WA_API_URL` 未配置时 mock+日志，默认接收号 `WA_TO=+6281513198596`；接官方 Business Cloud API 后替换实现即可，调用方不变 |
+
+**v3 数据库迁移**：`db.ts#runMigrations` 自动把旧库 pipeline 重建为 v3（partner_id 可空 + 新增 lead_id）；因 `foreign_keys=ON` 下 RENAME 会改写引用方外键，迁移用 `legacy_alter_table` 保护并自动修复历史悬空 FK（pipeline_event 回锚 pipeline）。
 
 默认 Phase1 模板已种子 7 字段：partner_name / entity_nationality / asset_summary / qualifications / cooperation_intent(select,5 选项) / target_segment(multiselect,7 板块) / attachments(file)。
 
@@ -106,12 +113,13 @@ npm run dev          # http://localhost:5173, /api 代理到 8080
 
 ## 角色矩阵
 
-| 角色 | 登录 | 表单填报 | 审核 | Pipeline 流转 | Dashboard 明细 | Dashboard 汇总 | 对外门户 | 用户/角色/模板/SMTP 配置 |
-|---|---|---|---|---|---|---|---|---|---|
-| Super Admin | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 浏览 | ✅ |
-| 合作方填报员 | ✅ | ✅（仅本人）| ❌ | 仅查看自己 | ❌ | ❌ | 浏览 | ❌ |
-| 内部审核管理员 | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | 浏览 | ❌ |
-| BOD 只读 | ✅ | ❌ | ❌ | 仅查看 | ❌ | ✅ | 浏览 | ❌ |
+| 角色 | 登录 | 表单填报 | 审核 | Pipeline 流转 | 资产（查看/维护） | Lead（录入/查看） | 项目（查看/维护） | 用户/角色/模板/SMTP 配置 |
+|---|---|---|---|---|---|---|---|---|
+| Super Admin | ✅ | ✅ | ✅ | ✅ | ✅ / ✅ | ✅ / ✅ 全量 | ✅ / ✅ | ✅ |
+| 合作方填报员 | ✅ | ✅（仅本人）| ❌ | 仅查看自己 | ✅ / ❌ | ✅ 录入 / 仅本人 | ✅ / ❌ | ❌ |
+| 内部审核管理员 | ✅ | ❌ | ✅ | ✅ | ✅ / ❌ | ❌ / ✅ 全量 | ✅ / ✅ | ❌ |
+| BOD 只读 | ✅ | ❌ | ❌ | 仅查看 | ✅ / ❌ | ❌ / 仅查看 | ✅ / ❌ | ❌ |
+| 访客 | 免登 | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | 访客 | 免登 | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
 
 ## License
