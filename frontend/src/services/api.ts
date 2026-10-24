@@ -130,10 +130,16 @@ async function mockHandler(config: InternalAxiosRequestConfig) {
     };
   } else if (method === 'get' && url === '/partners') {
     data = [
-      { id: 1, company_name: 'PT Sinar Mas', nationality: 'ID', industry: 'Pulp & Paper', tier: 'existing', status: 'active' },
-      { id: 2, company_name: 'Hangzhou GreenTech', nationality: 'CN', industry: 'Renewables', tier: 'manufacturer', status: 'active' },
-      { id: 3, company_name: 'Shenyang Auto Parts', nationality: 'CN', industry: 'Automotive', tier: 'manufacturer', status: 'invited' },
-      { id: 4, company_name: 'Foshan Ceramics', nationality: 'CN', industry: 'Building Materials', tier: 'explorer', status: 'paused' },
+      { id: 1, company_name: 'PT Kawasan Industri Jababeka Tbk', nationality: 'ID', industry: 'Township & Industrial Estates', tier: 'existing', status: 'active',
+        account: { id: 1, username: 'admin', enabled: 1 }, submits: 2, leads: 3, projects: 2, pipeline_stage: 'site_visit', last_active: '2026-10-23 09:12:00' },
+      { id: 2, company_name: 'Hangzhou GreenTech', nationality: 'CN', industry: 'Renewable Energy', tier: 'manufacturer', status: 'active',
+        account: { id: 2, username: 'partner1', enabled: 1 }, submits: 1, leads: 2, projects: 1, pipeline_stage: 'matching', last_active: '2026-10-22 14:30:00' },
+      { id: 3, company_name: 'Shenyang Auto Parts', nationality: 'CN', industry: 'Automotive', tier: 'manufacturer', status: 'invited',
+        account: { id: 3, username: 'partner2', enabled: 1 }, submits: 0, leads: 1, projects: 0, pipeline_stage: 'intake', last_active: '2026-10-18 11:02:00' },
+      { id: 4, company_name: 'Foshan Ceramics', nationality: 'CN', industry: 'Building Materials', tier: 'explorer', status: 'paused',
+        account: { id: 4, username: 'partner3', enabled: 1 }, submits: 0, leads: 0, projects: 0, pipeline_stage: null, last_active: '2026-09-30 10:20:00' },
+      { id: 5, company_name: 'Singapore SMEs Consortium', nationality: 'SG', industry: 'Manufacturing', tier: 'explorer', status: 'active',
+        account: { id: 5, username: 'partner4', enabled: 1 }, submits: 1, leads: 0, projects: 0, pipeline_stage: 'intake', last_active: '2026-10-20 09:55:00' },
     ];
   } else if (method === 'get' && /\/partners\/\d+\/pipeline/.test(url)) {
     data = {

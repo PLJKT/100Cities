@@ -88,7 +88,7 @@ npm run dev          # http://localhost:5173, /api 代理到 8080
 | Dashboard 待办与监控 | `/api/dashboard/summary#todos` | **v4**：待审核潜客数、7 天内需跟进数、超期提交数、进行中项目数；资产占用率（reserved+leased/total）；潜客周趋势/来源/行业分布；项目平均进度 |
 | 审核五步流转 | `GET/PUT /api/leads/:id/pipeline` | 每阶段记录 entered_at（停留时长可算）；decision 阶段自动同步 lead=approved |
 | 字段级动态模板 | `GET/POST /api/admin/templates`、`PUT /:id/fields` | Admin 维护字段（类型/必填/排序/三语标签/选项） |
-| 企业档案（会员资料） | `GET/POST /api/partners`、`GET /my` | tier 五类、status 状态机；合作方仅可改自己 |
+| 企业档案（会员资料） | `GET/POST /api/partners`、`GET /my` | tier 五类、status 状态机；合作方仅可改自己。**v4.1**：列表带关键指标（提交数/潜客数/项目数/pipeline 阶段/最近活动），支撑前端会员资料清单页 `/app/members`（表格 + Tag 标注指标） |
 | SMTP 配置 + 通知 | `GET/PUT /api/admin/settings/email`、`notification` 表 | DB 优先、env 兜底；邮件/WA 留痕 |
 | WhatsApp 适配器 | `notify.service#sendWhatsAppNotification` | 路线 B：mock+日志，默认接收号 `WA_TO=+6281513198596` |
 

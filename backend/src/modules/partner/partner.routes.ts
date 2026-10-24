@@ -9,10 +9,32 @@ const r = Router();
 const TIERS = ['explorer', 'manufacturer', 'tech', 'existing', 'investor'];
 const STAGES = ['intake', 'matching', 'site_visit', 'proposal', 'decision'];
 
-/** 档案 + 关联账号信息 */
+/** 档案 + 关联账号信息 + 关键指标（清单展示用） */
 function enrich(row: any) {
-  const u = getDb().prepare(`SELECT id, username, email, phone, enabled FROM sys_user WHERE id=?`).get(row.user_id);
-  return { ...row, account: u || null };
+  const db = getDb();
+  const u = db.prepare(`SELECT id, username, email, phone, enabled FROM sys_user WHERE id=?`).get(row.user_id);
+  const submits = (db.prepare(`SELECT COUNT(*) c FROM form_submit WHERE user_id=?`).get(row.user_id) as any).c;
+  const leads = (db.prepare(`SELECT COUNT(*) c FROM lead WHERE channel_user_id=?`).get(row.user_id) as any).c;
+  const projects = (db.prepare(`SELECT COUNT(*) c FROM project WHERE member_id=?`).get(row.id) as any).c;
+  const pipe = db.prepare(`SELECT stage FROM pipeline WHERE partner_id=?`).get(row.id) as any;
+  const lastActive = (db
+    .prepare(
+      `SELECT MAX(m) AS m FROM (
+         SELECT updated_at AS m FROM partner_profile WHERE id=?
+         UNION ALL SELECT submit_time AS m FROM form_submit WHERE user_id=?
+         UNION ALL SELECT updated_at AS m FROM lead WHERE channel_user_id=?
+         UNION ALL SELECT updated_at AS m FROM project WHERE member_id=?)`
+    )
+    .get(row.id, row.user_id, row.user_id, row.id) as any).m;
+  return {
+    ...row,
+    account: u || null,
+    submits,
+    leads,
+    projects,
+    pipeline_stage: pipe?.stage || null,
+    last_active: lastActive || null,
+  };
 }
 
 // ---------- 档案 ----------
