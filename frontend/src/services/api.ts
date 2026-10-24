@@ -121,8 +121,46 @@ async function mockHandler(config: InternalAxiosRequestConfig) {
     ];
   } else if (method === 'post' && (url === '/forms/submit' || url === '/forms/draft')) {
     data.ok = true; data.id = 99; data.locked = true;
-  } else if (method === 'get' && url === '/partners/my') {
-    data = {
+  } else if (method === 'get' && (url === '/assets' || /^\/assets\/category\//.test(url))) {
+    data = [
+      { id: 1, name: 'Cikarang Jababeka City – Industrial Plots', category: 'industrial', location: 'Cikarang, West Java', size_desc: '~2,000 ha developed',
+        description: "Indonesia's pioneer township & industrial estate since 1989. Ready-to-build factory plots, road grid, power, water and dry port inside the estate.",
+        status: 'available', price_desc: 'From IDR 2.5M/m², HGB 30+20 years', min_area: '2,000 m²', max_area: '50,000 m²',
+        key_specs: '3-phase power to plot, 6m road grid, 20m main arteries, water & fiber available', owner_contact: 'Ms. Febiyanti — febiyanti@jababeka.com', sort: 1 },
+      { id: 2, name: 'Kendal Industrial Park', category: 'industrial', location: 'Kendal, Central Java', size_desc: '~2,200 ha SEZ',
+        description: 'Jointly opened Nov 2016 by the President of Indonesia and the Prime Minister of Singapore. Ideal for export-oriented manufacturers.',
+        status: 'available', price_desc: 'On application (SEZ incentives: tax holiday 10–15 yrs)', min_area: '5,000 m²', max_area: '100,000 m²',
+        key_specs: 'SEZ incentives, deep-water port access via Semarang, dedicated power', owner_contact: 'Juliani Kusumaningrum — juliani.kusumaningrum@kik.co.id', sort: 2 },
+      { id: 3, name: 'Tanjung Lesung SEZ', category: 'sez', location: 'Pandeglang, Banten', size_desc: '~1,500 ha',
+        description: 'Tourism & MICE special economic zone on the Sunda Strait coast, with international hotel operators and resort land.',
+        status: 'planning', price_desc: 'On application', min_area: '10,000 m²', max_area: '200,000 m²',
+        key_specs: 'Beachfront resort land, MICE venues, airport proximity', owner_contact: 'Jababeka Investor Desk', sort: 3 },
+      { id: 4, name: 'Morotai SEZ', category: 'sez', location: 'Morotai, North Maluku', size_desc: '~800 ha',
+        description: 'Island logistics & fisheries hub SEZ in eastern Indonesia, part of the national growth corridor.',
+        status: 'planning', price_desc: 'On application', min_area: '10,000 m²', max_area: '150,000 m²',
+        key_specs: 'Fisheries/logistics incentives, island port access', owner_contact: 'Jababeka Investor Desk', sort: 4 },
+      { id: 5, name: 'Jababeka Gas-Fired Power Plant', category: 'power', location: 'Cikarang, West Java', size_desc: '130 MW',
+        description: 'Captive gas-fired power supporting estate industries with stable, own-grid electricity supply.',
+        status: 'available', price_desc: 'PPA/offtake on application', key_specs: '130 MW capacity, own-grid, 24/7 reliability', owner_contact: 'Jababeka Utilities Division', sort: 5 },
+      { id: 6, name: 'Jababeka Dry Port (CTC)', category: 'dryport', location: 'Cikarang, West Java', size_desc: '~200 ha',
+        description: 'Integrated container terminal & customs facility inside the estate, connecting to Tanjung Priok and Tanjung Perak.',
+        status: 'available', price_desc: 'Service/land lease on application', key_specs: 'Customs bonded zone, rail & road connectivity, 1M TEU capacity', owner_contact: 'Jababeka Port Division', sort: 6 },
+      { id: 7, name: 'Water Treatment & Estate Utilities', category: 'water', location: 'Cikarang, West Java', size_desc: 'multiple plants',
+        description: 'Water treatment, wastewater and estate-wide utilities serving 1.2M residents and 2,000+ factories.',
+        status: 'available', price_desc: 'Utility tariffs per PAM/PLN benchmark', key_specs: 'Treated water, wastewater, fiber, estate security', owner_contact: 'Jababeka Utilities Division', sort: 7 },
+      { id: 8, name: 'Jababeka University & Teaching Hospital', category: 'education', location: 'Cikarang, West Java', size_desc: 'campus + hospital',
+        description: 'President University and Jababeka Hospital – education & healthcare anchors for talent and community life.',
+        status: 'available', price_desc: 'Partnership/JV on application', key_specs: 'President University (4,000+ students), 250-bed teaching hospital', owner_contact: 'Jababeka Education & Health Division', sort: 8 },
+    ].filter((a: any) => !/^\/assets\/category\//.test(url) || a.category === url.split('/').pop());
+  } else if (method === 'post' && url === '/assets/match') {
+    const body = typeof config.data === 'string' ? JSON.parse(config.data) : config.data;
+    data.results = [
+      { id: 1, name: 'Cikarang Jababeka City – Industrial Plots', category: 'industrial', location: 'Cikarang, West Java', size_desc: '~2,000 ha developed', price_desc: 'From IDR 2.5M/m², HGB 30+20 years', match_score: 9 },
+      { id: 2, name: 'Kendal Industrial Park', category: 'industrial', location: 'Kendal, Central Java', size_desc: '~2,200 ha SEZ', price_desc: 'On application (SEZ incentives)', match_score: 7 },
+      { id: 6, name: 'Jababeka Dry Port (CTC)', category: 'dryport', location: 'Cikarang, West Java', size_desc: '~200 ha', price_desc: 'Service/land lease on application', match_score: 5 },
+      { id: 5, name: 'Jababeka Gas-Fired Power Plant', category: 'power', location: 'Cikarang, West Java', size_desc: '130 MW', price_desc: 'PPA/offtake on application', match_score: 4 },
+    ];
+  } else if (method === 'get' && url === '/partners/my') {    data = {
       id: 1, company_name: 'PT Kawasan Industri Jababeka Tbk', nationality: 'ID',
       industry: 'Township & Industrial Estates', tier: 'existing', status: 'active',
       contact_email: 'partners@jababeka.com', contact_phone: '+62 21 1234 5678',

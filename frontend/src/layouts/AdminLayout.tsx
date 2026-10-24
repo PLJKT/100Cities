@@ -16,6 +16,7 @@ export default function AdminLayout() {
     { key: '/app/partner/my', label: t('nav.mySubmits') },
     { key: '/app/review', label: t('nav.review') },
     { key: '/app/members', label: t('nav.members') },
+    { key: '/app/assets', label: t('nav.assets') },
     { key: '/app/admin/users', label: t('nav.users') },
     { key: '/app/admin/roles', label: t('nav.roles') },
     { key: '/app/admin/templates', label: t('nav.templates') },

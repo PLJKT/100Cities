@@ -10,6 +10,7 @@ import UserManage from '../pages/admin/UserManage';
 import RoleManage from '../pages/admin/RoleManage';
 import TemplateEditor from '../pages/admin/TemplateEditor';
 import Members from '../pages/admin/Members';
+import Assets from '../pages/admin/Assets';
 import Dashboard from '../pages/dashboard/Dashboard';
 import RequireAuth from './guard';
 
@@ -36,6 +37,7 @@ export default function AppRouter() {
         <Route path="review" element={<ReviewList />} />
         <Route path="review/:id" element={<ReviewDetail />} />
         <Route path="members" element={<Members />} />
+        <Route path="assets" element={<Assets />} />
         <Route path="admin/users" element={<UserManage />} />
         <Route path="admin/roles" element={<RoleManage />} />
         <Route path="admin/templates" element={<TemplateEditor />} />

@@ -61,8 +61,8 @@ npm run dev          # http://localhost:5173, /api 代理到 8080
 | 模块 | 接口 | 说明 |
 |---|---|---|
 | 字段级动态模板 | `GET/POST /api/admin/templates`、`PUT /:id/fields`、`DELETE /:id/fields/:fid` | Admin 可视化维护字段（text/textarea/number/select/multiselect/file、必填、排序、三语标签、选项）；填报端 `GET /api/forms/:templateKey` 只返回 `enabled=1` 的字段 |
-| 企业档案（会员资料） | `GET/POST /api/partners`、`PUT /:id`、`GET /my` | 与 sys_user 一对一；tier 五类（explorer/manufacturer/tech/existing/investor）、status 状态机（invited/active/paused）；合作方仅可改自己 |
-| **资产清单（JB 可合作资产）** | `GET /api/assets`、`GET /category/:cat`、`POST/PUT/DELETE` | **v3 新增**：8 大业务板块种子（工业地块/Kendal/Tanjung Lesung/Morotai/电厂/干港/水务/教育与医院）；登录可见、Super Admin 维护（admin.assets），软删 enabled=0 |
+| 企业档案（会员资料） | `GET/POST /api/partners`、`PUT /:id`、`GET /my` | 与 sys_user 一对一；tier 五类（explorer/manufacturer/tech/existing/investor）、status 状态机（invited/active/paused）；合作方仅可改自己。**v4.1**：列表带关键指标（提交/潜客/项目/pipeline 阶段/最近活动），前端 `/app/members` 清单页 |
+| **资产清单（JB 可合作资产）** | `GET /api/assets`、`GET /category/:cat`、`POST/PUT/DELETE` | **v3 新增**：8 大业务板块种子（工业地块/Kendal/Tanjung Lesung/Morotai/电厂/干港/水务/教育与医院）；登录可见、Super Admin 维护（admin.assets），软删 enabled=0。**v4.1 前端**：`/app/assets` Project Assets List 清单页（指标卡+分类筛选+详情抽屉+考察匹配面板） |
 | **渠道录入（潜在客户）** | `POST /api/leads`、`GET /api/leads`、`GET /my`、`PUT /:id/status` | **v3 新增**：渠道方录入潜在客户（行业/规模/诉求/联系人/来源渠道），仅看自己（/my 隔离，列表需 review 权限）；审核可改状态 new→under_review→approved/rejected/converted |
 | **审核五步流转（关联 Lead）** | `GET /:id/pipeline`、`PUT /:id/pipeline` | **v3 扩展**：pipeline 增加 lead_id 关联（partner_id 兼容保留）；渠道录入即自动建 intake，推进时同步 lead 状态；全量事件留痕 pipeline_event；Admin/Reviewer 推进、渠道方可见自己 |
 | **项目进度（会员合作项目）** | `GET /api/projects`、`GET /my`、`POST`、`PUT /:id` | **v3 新增**：会员合作项目（关联 lead + 会员档案）；阶段复用五步、progress_note 自由进度说明、status active/paused/completed；返回自动 enrich lead/会员信息 |
