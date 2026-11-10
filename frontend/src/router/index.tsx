@@ -12,6 +12,9 @@ import TemplateEditor from '../pages/admin/TemplateEditor';
 import Members from '../pages/admin/Members';
 import Assets from '../pages/admin/Assets';
 import Dashboard from '../pages/dashboard/Dashboard';
+import CaseList from '../pages/cases/CaseList';
+import TaskList from '../pages/tasks/TaskList';
+import AutomationConsole from '../pages/automation/AutomationConsole';
 import RequireAuth from './guard';
 
 export default function AppRouter() {
@@ -32,6 +35,9 @@ export default function AppRouter() {
       >
         <Route index element={<Navigate to="/app/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="cases" element={<CaseList />} />
+        <Route path="tasks" element={<TaskList />} />
+        <Route path="automation" element={<AutomationConsole />} />
         <Route path="partner/form" element={<FormFill />} />
         <Route path="partner/my" element={<MySubmits />} />
         <Route path="review" element={<ReviewList />} />

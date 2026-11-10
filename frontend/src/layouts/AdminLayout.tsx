@@ -12,11 +12,14 @@ export default function AdminLayout() {
 
   const items = [
     { key: '/app/dashboard', label: t('nav.dashboard') },
+    { key: '/app/cases', label: t('nav.cases') },
+    { key: '/app/tasks', label: t('nav.tasks') },
     { key: '/app/partner/form', label: t('nav.partnerForm') },
     { key: '/app/partner/my', label: t('nav.mySubmits') },
     { key: '/app/review', label: t('nav.review') },
     { key: '/app/members', label: t('nav.members') },
     { key: '/app/assets', label: t('nav.assets') },
+    { key: '/app/automation', label: t('nav.automation') },
     { key: '/app/admin/users', label: t('nav.users') },
     { key: '/app/admin/roles', label: t('nav.roles') },
     { key: '/app/admin/templates', label: t('nav.templates') },

@@ -3,11 +3,12 @@ import { getDb } from '../../config/db';
 import { authRequired, AuthedRequest } from '../../middlewares/auth';
 import { requirePerm } from '../../middlewares/rbac';
 import { writeLog } from '../log/log.service';
+import { emit, drain } from '../automation/bus';
+import { advanceStage, ensureCaseForLead, STAGES } from '../automation/case.service';
 
 const r = Router();
 
 const LEAD_STATUSES = ['new', 'under_review', 'approved', 'rejected', 'converted'];
-const STAGES = ['intake', 'matching', 'site_visit', 'proposal', 'decision'];
 const PRIORITIES = ['low', 'normal', 'high', 'urgent'];
 const FOLLOWUP_ACTIONS = ['call', 'email', 'meeting', 'site_visit', 'note'];
 
@@ -101,7 +102,17 @@ r.post('/', authRequired, requirePerm('partner.form'), (req: AuthedRequest, res)
       next_follow_at || null,
     );
   writeLog(req.user!.uid, 'lead.create', 'lead', Number(info.lastInsertRowid), { company_name });
-  res.json({ id: info.lastInsertRowid, status: 'new' });
+  // 线索录入即触发联动：R03 会建案 + 生成资格判定任务
+  const eventId = emit({
+    type: 'lead.created',
+    entityType: 'lead',
+    entityId: Number(info.lastInsertRowid),
+    actor: { type: 'user', userId: req.user!.uid },
+    payload: { lead_id: Number(info.lastInsertRowid), company_name },
+  });
+  const drained = drain();
+  const c = getDb().prepare(`SELECT id, case_no FROM biz_case WHERE lead_id=?`).get(info.lastInsertRowid);
+  res.json({ id: info.lastInsertRowid, status: 'new', event_id: eventId, case: c || null, automation: drained });
 });
 
 /** 潜客详情（v4：含 pipeline 全历史 + 跟进台账 + 关联项目） */
@@ -170,7 +181,7 @@ r.put('/:id', authRequired, requirePerm('review'), (req: AuthedRequest, res) => 
 
 // ---------- Pipeline（审核五步流转，关联 lead） ----------
 
-/** 查看审核流程（管理员/审核/录入渠道方） */
+/** 查看审核流程（管理员/审核/录入渠道方）——阶段真相来自案件 pipeline */
 r.get('/:id/pipeline', authRequired, (req: AuthedRequest, res) => {
   const db = getDb();
   const lead = db.prepare(`SELECT * FROM lead WHERE id=?`).get(req.params.id) as any;
@@ -179,44 +190,32 @@ r.get('/:id/pipeline', authRequired, (req: AuthedRequest, res) => {
     req.user!.role_id === 1 || req.user!.role_id === 3 || lead.channel_user_id === req.user!.uid;
   if (!canView) return res.status(403).json({ error: { message: 'forbidden' } });
 
-  let pipe = db.prepare(`SELECT * FROM pipeline WHERE lead_id=?`).get(lead.id) as any;
-  if (!pipe) {
-    const info = db.prepare(`INSERT INTO pipeline (lead_id, stage) VALUES (?, 'intake')`).run(lead.id);
-    pipe = db.prepare(`SELECT * FROM pipeline WHERE id=?`).get(info.lastInsertRowid);
-  }
-  const events = db.prepare(`SELECT * FROM pipeline_event WHERE pipeline_id=? ORDER BY id`).all(pipe.id);
-  res.json({ lead: enrich(lead), pipeline: pipe, events });
+  const c = ensureCaseForLead(lead.id, { type: 'user', userId: req.user!.uid });
+  const pipe = db.prepare(`SELECT * FROM pipeline WHERE case_id=?`).get(c.id) as any;
+  const events = pipe ? db.prepare(`SELECT * FROM pipeline_event WHERE pipeline_id=? ORDER BY id`).all(pipe.id) : [];
+  res.json({ lead: enrich(lead), case: c, pipeline: pipe, events });
 });
 
-/** 推进审核阶段（管理员/审核；v4：记录阶段进入时间） */
-r.put('/:id/pipeline', authRequired, requirePerm('review'), (req: AuthedRequest, res) => {
+/**
+ * 推进审核阶段 —— 不再自己写 pipeline。
+ * 统一走 advanceStage：写阶段 + 写历史 + 发 case.stage_changed，
+ * 下游（任务、项目、资产预留、里程碑）由规则自动跟上。
+ */
+r.put('/:id/pipeline', authRequired, requirePerm('review'), (req: AuthedRequest, res, next) => {
   const db = getDb();
   const lead = db.prepare(`SELECT * FROM lead WHERE id=?`).get(req.params.id) as any;
   if (!lead) return res.status(404).json({ error: { message: 'lead not found' } });
-  const { stage, note } = req.body || {};
+  const { stage, note, force } = req.body || {};
   if (!STAGES.includes(stage)) return res.status(400).json({ error: { message: `stage must be one of ${STAGES.join('/')}` } });
 
-  let pipe = db.prepare(`SELECT * FROM pipeline WHERE lead_id=?`).get(lead.id) as any;
-  if (!pipe) {
-    const info = db.prepare(`INSERT INTO pipeline (lead_id, stage) VALUES (?, 'intake')`).run(lead.id);
-    pipe = db.prepare(`SELECT * FROM pipeline WHERE id=?`).get(info.lastInsertRowid);
+  try {
+    const c = ensureCaseForLead(lead.id, { type: 'user', userId: req.user!.uid });
+    const out = advanceStage(c.id, stage, note || null, { type: 'user', userId: req.user!.uid }, { force: !!force });
+    writeLog(req.user!.uid, 'lead.pipeline.advance', 'biz_case', c.id, { from: out.from, to: stage });
+    res.json({ ok: true, case_id: c.id, case_no: c.case_no, from: out.from, to: stage, pipeline_id: out.pipelineId, automation: out.drained });
+  } catch (e) {
+    next(e);
   }
-  const from = pipe.stage;
-  db.transaction(() => {
-    db.prepare(`UPDATE pipeline SET stage=?, stage_note=?, entered_at=datetime('now'), updated_by=?, updated_at=datetime('now') WHERE id=?`)
-      .run(stage, note || null, req.user!.uid, pipe.id);
-    db.prepare(`INSERT INTO pipeline_event (pipeline_id, from_stage, to_stage, note, user_id) VALUES (?, ?, ?, ?, ?)`)
-      .run(pipe.id, from, stage, note || null, req.user!.uid);
-    // 同步 lead 状态：进入审核即 under_review；到 decision 时转 approved
-    if (lead.status === 'new') {
-      db.prepare(`UPDATE lead SET status='under_review', updated_at=datetime('now') WHERE id=?`).run(lead.id);
-    }
-    if (stage === 'decision' && lead.status !== 'rejected') {
-      db.prepare(`UPDATE lead SET status='approved', updated_at=datetime('now') WHERE id=?`).run(lead.id);
-    }
-  })();
-  writeLog(req.user!.uid, 'lead.pipeline.advance', 'pipeline', pipe.id, { from, to: stage });
-  res.json({ ok: true, from, to: stage, pipeline_id: pipe.id });
 });
 
 export default r;

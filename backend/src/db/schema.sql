@@ -400,3 +400,154 @@ INSERT OR IGNORE INTO lead (id, channel_user_id, company_name, industry, company
 INSERT OR IGNORE INTO project (id, lead_id, member_id, name, description, stage, progress_note, status, started_at) VALUES
   (1, 1, 1, 'GreenTech Solar Module Plant – Cikarang', 'Solar module assembly plant on Cikarang industrial plot A7, targeting 2027 COD.',
    'site_visit', 'Site visit completed Nov 2026; land allocation draft under review.', 'active', '2026-10-05');
+
+-- ============================================================
+-- v5 — 统一案件主链 + 业务事件总线 + 自动化规则 + 持久化任务 + 资产预留
+--
+-- 设计原则（回应"模块自动化联动没有体现"）：
+--   1) pipeline.stage 仍是阶段唯一真相；biz_case 只持有生命周期与关联，不复制 stage，
+--      避免又造出一份会和 pipeline 打架的状态。
+--   2) 所有跨模块联动由 biz_event 驱动，业务路由不再各自手写 if 分支。
+--   3) sys_operation_log 保持"审计"语义（谁做了什么），biz_event 才是"业务事实"
+--      （发生了什么）——审计日志只增不删，本身不能也不应该驱动下游。
+--   4) 任务实体化：待办可分配、可计时、可升级；Dashboard 不再实时拼 COUNT，
+--      因此"待办数"与"任务列表"必然一致。
+-- ============================================================
+
+-- ---------- 统一案件（招商主链，一条记录串起 提交→会员→线索→阶段→项目→资产） ----------
+CREATE TABLE IF NOT EXISTS biz_case (
+  id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+  case_no            TEXT NOT NULL UNIQUE,
+  origin             TEXT NOT NULL DEFAULT 'manual',   -- submission/lead/partner/manual
+  org_name           TEXT NOT NULL,
+  country            TEXT,                              -- ID/SG/CN/...
+  industry           TEXT,
+  company_size       TEXT,
+  source_channel     TEXT,
+  owner_user_id      INTEGER REFERENCES sys_user(id),   -- 案件负责人（任务默认落到他）
+  lifecycle          TEXT NOT NULL DEFAULT 'inquiry',   -- inquiry/qualified/active/won/lost/dropped
+  review_status      TEXT NOT NULL DEFAULT 'pending',   -- pending/approved/rejected
+  value_desc         TEXT,
+  lead_id            INTEGER REFERENCES lead(id),
+  partner_profile_id INTEGER REFERENCES partner_profile(id),
+  submit_id          INTEGER REFERENCES form_submit(id),
+  project_id         INTEGER REFERENCES project(id),
+  asset_id           INTEGER REFERENCES asset(id),      -- 当前意向资产（可被 hold 校验）
+  created_by         INTEGER,
+  created_at         TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at         TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_case_submit  ON biz_case(submit_id)         WHERE submit_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS ux_case_lead    ON biz_case(lead_id)           WHERE lead_id IS NOT NULL;
+CREATE INDEX        IF NOT EXISTS ix_case_life    ON biz_case(lifecycle);
+CREATE INDEX        IF NOT EXISTS ix_case_partner ON biz_case(partner_profile_id);
+
+-- ---------- 业务事件流（append-only；驱动自动化，不是审计日志） ----------
+CREATE TABLE IF NOT EXISTS biz_event (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_type    TEXT NOT NULL,                 -- submission.approved / case.stage_changed / ...
+  entity_type   TEXT NOT NULL,                 -- biz_case / form_submit / asset / task ...
+  entity_id     INTEGER,
+  case_id       INTEGER,
+  actor_user_id INTEGER,
+  actor         TEXT NOT NULL DEFAULT 'system', -- system / user
+  payload       TEXT NOT NULL DEFAULT '{}',
+  depth         INTEGER NOT NULL DEFAULT 0,     -- 级联深度（防环）
+  cause_event_id INTEGER,                       -- 由哪个事件触发，用于追溯
+  status        TEXT NOT NULL DEFAULT 'pending',-- pending/processed/failed
+  error         TEXT,
+  occurred_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  processed_at  TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_event_status ON biz_event(status, id);
+CREATE INDEX IF NOT EXISTS ix_event_case   ON biz_event(case_id);
+
+-- 事件正文不可篡改（只允许改 status / processed_at / error）
+CREATE TRIGGER IF NOT EXISTS trg_biz_event_no_mutate
+BEFORE UPDATE ON biz_event
+FOR EACH ROW
+WHEN NEW.event_type    IS NOT OLD.event_type
+  OR NEW.entity_type   IS NOT OLD.entity_type
+  OR NEW.entity_id     IS NOT OLD.entity_id
+  OR NEW.case_id       IS NOT OLD.case_id
+  OR NEW.payload       IS NOT OLD.payload
+  OR NEW.occurred_at   IS NOT OLD.occurred_at
+BEGIN
+  SELECT RAISE(ABORT, 'biz_event is append-only');
+END;
+
+-- ---------- 自动化规则（声明式：事件 → 条件 → 动作） ----------
+CREATE TABLE IF NOT EXISTS automation_rule (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  rule_key       TEXT NOT NULL UNIQUE,
+  name           TEXT NOT NULL,
+  event_type     TEXT NOT NULL,
+  condition_json TEXT NOT NULL DEFAULT '{}',
+  actions_json   TEXT NOT NULL DEFAULT '[]',
+  priority       INTEGER NOT NULL DEFAULT 0,
+  enabled        INTEGER NOT NULL DEFAULT 1,
+  description    TEXT,
+  created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- ---------- 自动化执行台账（解释"这条任务为什么会出现"） ----------
+CREATE TABLE IF NOT EXISTS automation_run (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  rule_key   TEXT NOT NULL,
+  event_id   INTEGER,
+  event_type TEXT NOT NULL,
+  case_id    INTEGER,
+  idem_key   TEXT NOT NULL,
+  outcome    TEXT NOT NULL,        -- applied/skipped/error
+  detail     TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(idem_key, rule_key)
+);
+CREATE INDEX IF NOT EXISTS ix_run_case ON automation_run(case_id);
+
+-- ---------- 持久化任务（待办实体：可分配 / 可计时 / 可升级） ----------
+CREATE TABLE IF NOT EXISTS task (
+  id                INTEGER PRIMARY KEY AUTOINCREMENT,
+  task_key          TEXT NOT NULL UNIQUE,   -- 幂等键：同案同类型同来源事件只建一次
+  case_id           INTEGER REFERENCES biz_case(id),
+  project_id        INTEGER REFERENCES project(id),
+  asset_id          INTEGER REFERENCES asset(id),
+  task_type         TEXT NOT NULL,
+  title             TEXT NOT NULL,
+  title_id          TEXT,
+  title_zh          TEXT,
+  detail            TEXT,
+  assignee_user_id  INTEGER REFERENCES sys_user(id),
+  assign_role       INTEGER,
+  priority          TEXT NOT NULL DEFAULT 'normal',
+  status            TEXT NOT NULL DEFAULT 'open',  -- open/done/cancelled
+  due_at            TEXT,
+  sla_hours         INTEGER,
+  escalation_level  INTEGER NOT NULL DEFAULT 0,
+  last_escalated_at TEXT,
+  created_by_event_id INTEGER,
+  created_at        TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at        TEXT NOT NULL DEFAULT (datetime('now')),
+  closed_at         TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_task_open     ON task(status, due_at);
+CREATE INDEX IF NOT EXISTS ix_task_case     ON task(case_id);
+CREATE INDEX IF NOT EXISTS ix_task_assignee ON task(assignee_user_id, status);
+
+-- ---------- 资产预留（防重复占用；替代"手改 status"） ----------
+CREATE TABLE IF NOT EXISTS asset_hold (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  asset_id    INTEGER NOT NULL REFERENCES asset(id),
+  case_id     INTEGER NOT NULL REFERENCES biz_case(id),
+  hold_type   TEXT NOT NULL DEFAULT 'soft',    -- soft(意向锁定) / hard(实质预留)
+  status      TEXT NOT NULL DEFAULT 'active',  -- active/confirmed/released/expired
+  area_desc   TEXT,
+  note        TEXT,
+  expires_at  TEXT,
+  created_by  INTEGER,
+  created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  released_at TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_hold_asset ON asset_hold(asset_id, status);
+CREATE INDEX IF NOT EXISTS ix_hold_case  ON asset_hold(case_id, status);

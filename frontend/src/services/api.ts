@@ -194,6 +194,40 @@ async function mockHandler(config: InternalAxiosRequestConfig) {
     data.ok = true;
   } else if (method === 'get' && url === '/public/project') {
     data = { name: '100 Cities Club', cities: 100, population: 287, intro: 'KIJA-led national urbanization initiative.' };
+  } else if (method === 'get' && url === '/cases') {
+    data = { items: mockCases(), total: mockCases().length };
+  } else if (method === 'get' && /^\/cases\/\d+$/.test(url)) {
+    data = mockCaseDetail(url);
+  } else if (method === 'get' && /^\/cases\/\d+\/timeline$/.test(url)) {
+    data = mockTimeline(url);
+  } else if (method === 'get' && /^\/cases\/\d+\/explain$/.test(url)) {
+    data = { runs: mockRuns(url), tasks: [] };
+  } else if (method === 'post' && /^\/cases\/\d+\/(stage|won|lost)$/.test(url)) {
+    data = { ok: true, from: 'matching', to: 'site_visit', automation: { processed: 1, errors: 0 } };
+  } else if (method === 'put' && /^\/cases\/\d+\/(asset|owner)$/.test(url)) {
+    data = { ok: true };
+  } else if (method === 'get' && url === '/tasks') {
+    const params: any = (config as any).params || {};
+    let rows = mockTasks();
+    if (params.status) rows = rows.filter((x) => x.status === params.status);
+    if (params.overdue) rows = rows.filter((x) => x.is_overdue === 1);
+    data = { items: rows, total: rows.length };
+  } else if (method === 'get' && /^\/tasks\/\d+$/.test(url)) {
+    data = mockTasks().find((x) => x.id === Number(url.split('/').pop())) || null;
+  } else if (method === 'put' && /^\/tasks\/\d+\/(status|assign)$/.test(url)) {
+    data = { ok: true };
+  } else if (method === 'get' && url === '/automation/rules') {
+    data = mockRules();
+  } else if (method === 'put' && /^\/automation\/rules\/.+/.test(url)) {
+    data = { ok: true };
+  } else if (method === 'get' && url === '/automation/events') {
+    data = mockEvents();
+  } else if (method === 'get' && url === '/automation/runs') {
+    data = mockRuns('/cases/1/explain');
+  } else if (method === 'post' && url === '/automation/sweep') {
+    data = { tasks: { escalated: 2 }, stages: { breached: 1 }, holds: { released: 1 }, drained: { processed: 0, errors: 0 } };
+  } else if (method === 'post' && /^\/automation\/replay\/\d+$/.test(url)) {
+    data = { ok: true, processed: 1, errors: 0 };
   } else {
     data = [];
   }
@@ -237,6 +271,181 @@ function mockPhase1Template() {
       ], enabled: 1 },
       { id: 7, field_key: 'attachments', field_type: 'file', required: 0, sort: 7, en_label: 'Attachments', id_label: 'Lampiran', zh_label: '附件', options: null, enabled: 1 },
     ],
+  };
+}
+
+/** ---------------- v5 mock：案件 / 任务 / 自动化台 ---------------- */
+function mockCases() {
+  return [
+    {
+      id: 1, case_no: 'C-202611-0001', org_name: 'Hangzhou GreenTech Co., Ltd.', country: 'CN',
+      lifecycle: 'active', review_status: 'approved', stage: 'proposal', stage_entered_at: '2026-11-02 09:00:00',
+      stage_age_days: 6, open_tasks: 3, overdue_tasks: 1, asset_id: 1,
+      asset_name: 'Cikarang Jababeka City – Industrial Plots',
+    },
+    {
+      id: 2, case_no: 'C-202611-0002', org_name: 'Acme Singapore Pte Ltd', country: 'SG',
+      lifecycle: 'qualified', review_status: 'approved', stage: 'site_visit', stage_entered_at: '2026-11-05 10:00:00',
+      stage_age_days: 3, open_tasks: 2, overdue_tasks: 0, asset_id: 2,
+      asset_name: 'Kendal Industrial Park',
+    },
+    {
+      id: 3, case_no: 'C-202611-0003', org_name: 'PT Sinar Mas', country: 'ID',
+      lifecycle: 'inquiry', review_status: 'pending', stage: 'intake', stage_entered_at: '2026-11-07 08:00:00',
+      stage_age_days: 1, open_tasks: 1, overdue_tasks: 0, asset_id: null, asset_name: null,
+    },
+    {
+      id: 4, case_no: 'C-202610-0009', org_name: 'Singapore SMEs Consortium', country: 'SG',
+      lifecycle: 'won', review_status: 'approved', stage: 'decision', stage_entered_at: '2026-10-20 08:00:00',
+      stage_age_days: 0, open_tasks: 1, overdue_tasks: 0, asset_id: 6, asset_name: 'Jababeka Dry Port (CTC)',
+    },
+  ];
+}
+
+function mockTasks() {
+  return [
+    {
+      id: 1, task_key: 'proposal.prepare:1:12', case_id: 1, case_no: 'C-202611-0001', org_name: 'Hangzhou GreenTech Co., Ltd.',
+      task_type: 'proposal.prepare', title: 'Prepare commercial proposal', title_id: 'Siapkan proposal komersial',
+      title_zh: '编制商务方案', detail: 'Hard hold on the asset is active for 30 days — the proposal must be issued within this window.',
+      assignee_user_id: 3, assignee_name: 'reviewer', priority: 'high', status: 'open',
+      due_at: '2026-11-09 09:00:00', is_overdue: 1, escalation_level: 1,
+    },
+    {
+      id: 2, task_key: 'matching.shortlist:1:9', case_id: 1, case_no: 'C-202611-0001', org_name: 'Hangzhou GreenTech Co., Ltd.',
+      task_type: 'matching.shortlist', title: 'Shortlist matching assets', title_id: 'Susun daftar aset yang cocok',
+      title_zh: '筛选匹配资产', detail: 'Use the asset match endpoint to shortlist up to 3 assets.',
+      assignee_user_id: 3, assignee_name: 'reviewer', priority: 'normal', status: 'open',
+      due_at: '2026-11-10 09:00:00', is_overdue: 0, escalation_level: 0,
+    },
+    {
+      id: 3, task_key: 'site_visit.schedule:2:14', case_id: 2, case_no: 'C-202611-0002', org_name: 'Acme Singapore Pte Ltd',
+      task_type: 'site_visit.schedule', title: 'Schedule site visit and confirm logistics', title_id: 'Jadwalkan kunjungan lokasi',
+      title_zh: '安排实地考察', detail: 'Asset hold expires in 72 hours — confirm the visit date before the hold is released.',
+      assignee_user_id: 3, assignee_name: 'reviewer', priority: 'high', status: 'open',
+      due_at: '2026-11-08 18:00:00', is_overdue: 1, escalation_level: 0,
+    },
+    {
+      id: 4, task_key: 'handover.contract:4:21', case_id: 4, case_no: 'C-202610-0009', org_name: 'Singapore SMEs Consortium',
+      task_type: 'handover.contract', title: 'Issue agreement and handover pack', title_id: 'Terbitkan perjanjian dan paket serah terima',
+      title_zh: '出具协议与交付包', detail: null,
+      assignee_user_id: 1, assignee_name: 'admin', priority: 'high', status: 'open',
+      due_at: '2026-11-11 09:00:00', is_overdue: 0, escalation_level: 0,
+    },
+    {
+      id: 5, task_key: 'review.completeness:3:18', case_id: 3, case_no: 'C-202611-0003', org_name: 'PT Sinar Mas',
+      task_type: 'review.completeness', title: 'Verify submission completeness', title_id: 'Verifikasi kelengkapan dokumen',
+      title_zh: '资料齐全性复核', detail: 'Check that all required Phase 1 fields and attachments were received.',
+      assignee_user_id: 3, assignee_name: 'reviewer', priority: 'high', status: 'done',
+      due_at: '2026-11-07 10:00:00', is_overdue: 0, escalation_level: 0,
+    },
+  ];
+}
+
+function mockRules() {
+  return [
+    {
+      rule_key: 'R01_submission_approved', name: 'Submission approved → open case', event_type: 'submission.approved',
+      condition: {}, enabled: 1, stats: { applied: 6, skipped: 0 },
+      description: '审核通过不再只改一个状态：建会员档案 → 开案 → 生成复核任务 → 通知申请人。',
+      actions: [
+        { type: 'ensure_partner', params: { status: 'active' } },
+        { type: 'ensure_case', params: { origin: 'submission', lifecycle: 'qualified' } },
+        { type: 'create_task', params: { task_type: 'review.completeness', sla_hours: 24 } },
+        { type: 'notify', params: { channel: 'email', to: 'applicant' } },
+      ],
+    },
+    {
+      rule_key: 'R06_stage_proposal', name: 'Stage → proposal (opens project + hard hold)', event_type: 'case.stage_changed',
+      condition: { to_stage: 'proposal' }, enabled: 1, stats: { applied: 3, skipped: 2 },
+      description: '进入方案阶段：自动建项目、下硬预留（30 天）、铺 5 个里程碑、生成方案任务。',
+      actions: [
+        { type: 'ensure_project', params: {} },
+        { type: 'hold_asset', params: { hold_type: 'hard', ttl_hours: 720 } },
+        { type: 'seed_milestones', params: { items: ['allocation 14d', 'terms 30d', 'DD 45d', 'agreement 60d', 'handover 90d'] } },
+        { type: 'create_task', params: { task_type: 'proposal.prepare', sla_hours: 72 } },
+      ],
+    },
+    {
+      rule_key: 'R10_task_overdue', name: 'Task overdue → escalate', event_type: 'task.overdue',
+      condition: {}, enabled: 1, stats: { applied: 4, skipped: 0, error: 1 },
+      description: '任务逾期自动升级并通知，不再依赖人盯着表格。',
+      actions: [{ type: 'escalate_task', params: {} }, { type: 'notify', params: { channel: 'whatsapp' } }],
+    },
+  ];
+}
+
+function mockEvents() {
+  return [
+    { id: 21, event_type: 'case.won', entity_type: 'biz_case', entity_id: 4, case_id: 4, actor: 'user', status: 'processed', occurred_at: '2026-11-07 17:20:00', payload: { case_no: 'C-202610-0009', note: 'signed' } },
+    { id: 20, event_type: 'case.stage_changed', entity_type: 'biz_case', entity_id: 1, case_id: 1, actor: 'user', status: 'processed', occurred_at: '2026-11-02 09:00:00', payload: { from_stage: 'site_visit', to_stage: 'proposal' } },
+    { id: 19, event_type: 'asset.conflict', entity_type: 'asset', entity_id: 2, case_id: 2, actor: 'system', status: 'pending', occurred_at: '2026-11-06 11:05:00', payload: { asset_id: 2, message: 'Asset already hard-held by C-202611-0002' } },
+    { id: 18, event_type: 'submission.approved', entity_type: 'form_submit', entity_id: 2, case_id: 3, actor: 'user', status: 'processed', occurred_at: '2026-11-07 08:00:00', payload: { submit_id: 2 } },
+  ];
+}
+
+function mockRuns(_url?: string) {
+  return [
+    { id: 9, rule_key: 'R08_case_won', rule_name: 'Case won → lease asset + close project', event_type: 'case.won', outcome: 'applied', detail: 'lease_asset: asset 6 leased; release_holds: 1 released; create_task: 1 created', created_at: '2026-11-07 17:20:03' },
+    { id: 8, rule_key: 'R12_asset_conflict', rule_name: 'Asset hold conflict → resolve', event_type: 'asset.conflict', outcome: 'applied', detail: 'create_task: 1 created', created_at: '2026-11-06 11:05:01' },
+    { id: 7, rule_key: 'R06_stage_proposal', rule_name: 'Stage → proposal', event_type: 'case.stage_changed', outcome: 'applied', detail: 'ensure_project: project 7 created; hold_asset: hard 30d; seed_milestones: 5; create_task: 1', created_at: '2026-11-02 09:00:02' },
+    { id: 6, rule_key: 'R04_stage_matching', rule_name: 'Stage → matching', event_type: 'case.stage_changed', outcome: 'skipped', detail: 'condition to_stage=matching not matched', created_at: '2026-11-02 09:00:02' },
+  ];
+}
+
+function mockTimeline(url: string) {
+  const id = Number(url.split('/')[2] || 1);
+  const c = mockCases().find((x) => x.id === id) || mockCases()[0];
+  return [
+    { at: '2026-10-28 09:12:00', kind: 'event', title: `Case ${c.case_no} opened`, detail: 'submission.approved' },
+    { at: '2026-10-28 09:12:01', kind: 'task', title: 'Verify submission completeness', detail: 'review.completeness · 24h' },
+    { at: '2026-10-30 14:00:00', kind: 'stage', title: 'intake → matching', detail: 'shortlist confirmed' },
+    { at: '2026-11-02 09:00:00', kind: 'event', title: 'Stage changed to proposal', detail: 'case.stage_changed' },
+    { at: '2026-11-02 09:00:02', kind: 'task', title: 'Prepare commercial proposal', detail: 'proposal.prepare · 72h' },
+    { at: '2026-11-02 09:00:02', kind: 'hold', title: 'Hard hold on asset #1 for 30 days', detail: 'asset_hold confirmed' },
+    { at: '2026-11-04 16:30:00', kind: 'notification', title: 'Applicant notified by email', detail: 'submission approved' },
+  ];
+}
+
+function mockCaseDetail(url: string) {
+  const id = Number(url.split('/').pop());
+  const c = mockCases().find((x) => x.id === id) || mockCases()[0];
+  return {
+    case: {
+      ...c, origin: 'submission', industry: null, company_size: null, source_channel: 'submission',
+      owner_user_id: null, value_desc: null, lead_id: null, partner_profile_id: 1, submit_id: 1,
+      project_id: c.stage === 'proposal' || c.stage === 'decision' ? 7 : null,
+      created_at: '2026-10-28 09:12:00', updated_at: '2026-11-02 09:00:00',
+    },
+    stage: c.stage, stage_entered_at: c.stage_entered_at, stage_age_days: c.stage_age_days,
+    stage_sla_days: { intake: 14, matching: 14, site_visit: 21, proposal: 21, decision: 14 }[c.stage] ?? 14,
+    partner: { id: 1, company_name: c.org_name, nationality: c.country, tier: 'manufacturer', status: 'active' },
+    lead: null, submit: { id: 1, doc_no: 'P1-FS-2026-001', status: 'approved' },
+    submit_data: [{ field_key: 'partner_name', field_value: c.org_name }],
+    project: c.stage === 'proposal' || c.stage === 'decision'
+      ? { id: 7, name: `${c.org_name} – Cikarang`, stage: 'proposal', status: 'active', progress_pct: 35 }
+      : null,
+    milestones: c.stage === 'proposal' || c.stage === 'decision'
+      ? [
+        { id: 1, name: 'Land / space allocation confirmed', due_date: '2026-11-16', status: 'open' },
+        { id: 2, name: 'Commercial terms agreed', due_date: '2026-12-02', status: 'open' },
+        { id: 3, name: 'Due diligence completed', due_date: '2026-12-17', status: 'open' },
+        { id: 4, name: 'Agreement signed', due_date: '2027-01-01', status: 'open' },
+        { id: 5, name: 'Handover and fit-out start', due_date: '2027-01-31', status: 'open' },
+      ]
+      : [],
+    asset: c.asset_id ? { id: c.asset_id, name: c.asset_name, status: c.stage === 'decision' ? 'leased' : 'reserved' } : null,
+    holds: c.asset_id
+      ? [{ id: 1, asset_id: c.asset_id, case_id: c.id, hold_type: c.stage === 'site_visit' ? 'soft' : 'hard', status: 'active', expires_at: '2026-12-02 09:00:00', created_at: '2026-11-02 09:00:00' }]
+      : [],
+    tasks: mockTasks().filter((t) => t.case_id === c.id).map((t) => ({ ...t, status: t.status === 'open' ? 'open' : 'done' })),
+    stage_history: [
+      { id: 1, from_stage: null, to_stage: 'intake', note: 'case opened', created_at: '2026-10-28 09:12:00' },
+      { id: 2, from_stage: 'intake', to_stage: 'matching', note: 'shortlist confirmed', created_at: '2026-10-30 14:00:00' },
+      { id: 3, from_stage: 'matching', to_stage: 'site_visit', note: 'site visit done', created_at: '2026-10-30 14:00:00' },
+      { id: 4, from_stage: 'site_visit', to_stage: 'proposal', note: 'terms drafted', created_at: '2026-11-02 09:00:00' },
+    ],
+    events: mockEvents(),
   };
 }
 

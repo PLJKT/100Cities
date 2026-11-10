@@ -7,14 +7,26 @@ import { writeLog } from '../log/log.service';
 const r = Router();
 
 const CATEGORIES = ['industrial', 'residential', 'commercial', 'power', 'water', 'dryport', 'sez', 'infra', 'education'];
-const STATUSES = ['available', 'reserved', 'leased', 'planning'];
+// v5：新增 held（软预留期间），与 reserved（硬预留）区分，避免"预留中"和"意向锁定"混用一态
+const STATUSES = ['available', 'held', 'reserved', 'leased', 'planning'];
 
-/** 资产列表（登录即可，供业务信息页/资产页面展示） */
+/** 资产列表（登录即可，供业务信息页/资产页面展示）
+ *  v5：附带当前有效预留信息，前端可直接显示"被哪个案件锁到什么时候" */
 r.get('/', authRequired, (_req, res) => {
-  const rows = getDb()
-    .prepare(`SELECT * FROM asset WHERE enabled=1 ORDER BY sort, id`)
-    .all();
-  res.json(rows);
+  const db = getDb();
+  const rows = db.prepare(`SELECT * FROM asset WHERE enabled=1 ORDER BY sort, id`).all() as any[];
+  const holds = db
+    .prepare(
+      `SELECT h.*, c.case_no, c.org_name FROM asset_hold h JOIN biz_case c ON c.id=h.case_id
+       WHERE h.status IN ('active','confirmed')`
+    )
+    .all() as any[];
+  res.json(
+    rows.map((a) => ({
+      ...a,
+      active_holds: holds.filter((h) => h.asset_id === a.id),
+    }))
+  );
 });
 
 /** 资产详情（含完整建档信息：价格/面积/参数/联系人） */
@@ -22,6 +34,37 @@ r.get('/:id', authRequired, (req, res) => {
   const row = getDb().prepare(`SELECT * FROM asset WHERE id=? AND enabled=1`).get(req.params.id);
   if (!row) return res.status(404).json({ error: { message: 'asset not found' } });
   res.json(row);
+});
+
+/** 资产的预留台账（谁锁的、锁到什么时候、软锁还是硬锁） */
+r.get('/:id/holds', authRequired, (req, res) => {
+  const rows = getDb()
+    .prepare(
+      `SELECT h.*, c.case_no, c.org_name, c.lifecycle
+       FROM asset_hold h JOIN biz_case c ON c.id=h.case_id
+       WHERE h.asset_id=? ORDER BY h.id DESC`
+    )
+    .all(req.params.id);
+  res.json(rows);
+});
+
+/** 人工释放预留（管理员；到期释放由调度器自动做） */
+r.post('/holds/:holdId/release', authRequired, requirePerm('admin.assets'), (req: AuthedRequest, res) => {
+  const db = getDb();
+  const h = db.prepare(`SELECT * FROM asset_hold WHERE id=?`).get(req.params.holdId) as any;
+  if (!h) return res.status(404).json({ error: { message: 'hold not found' } });
+  db.prepare(`UPDATE asset_hold SET status='released', released_at=datetime('now') WHERE id=?`).run(h.id);
+  const others = db
+    .prepare(`SELECT COUNT(*) n FROM asset_hold WHERE asset_id=? AND status IN ('active','confirmed')`)
+    .get(h.asset_id) as any;
+  if (!others.n) {
+    const a = db.prepare(`SELECT status FROM asset WHERE id=?`).get(h.asset_id) as any;
+    if (a && a.status !== 'planning' && a.status !== 'leased') {
+      db.prepare(`UPDATE asset SET status='available', updated_at=datetime('now') WHERE id=?`).run(h.asset_id);
+    }
+  }
+  writeLog(req.user!.uid, 'asset.hold.release', 'asset_hold', h.id, { asset_id: h.asset_id });
+  res.json({ ok: true });
 });
 
 /** 按板块筛选 */

@@ -215,6 +215,60 @@ export async function sendReminderEmail(opts: {
   }
 }
 
+/** 通用通知：自动化规则用（subject/body 由规则给出，不做模板拼装） */
+export async function sendGenericEmail(opts: {
+  to: string;
+  subject: string;
+  body: string;
+  refType?: string;
+  refId?: number;
+}) {
+  const s = getEmailSettings();
+  if (!s.host) {
+    // eslint-disable-next-line no-console
+    console.log(`[notify:email:generic] SMTP not configured. to=${opts.to} subject="${opts.subject}"`);
+    recordNotification({
+      channel: 'email',
+      to: opts.to,
+      subject: opts.subject,
+      bodySummary: opts.body,
+      refType: opts.refType,
+      refId: opts.refId,
+      status: 'sent',
+    });
+    return;
+  }
+  try {
+    await buildTransporter(s).sendMail({
+      from: `"${s.fromName}" <${s.fromAddr}>`,
+      to: opts.to,
+      subject: opts.subject,
+      html: `<p>${String(opts.body).replace(/\n/g, '<br/>')}</p>`,
+    });
+    recordNotification({
+      channel: 'email',
+      to: opts.to,
+      subject: opts.subject,
+      bodySummary: opts.body,
+      refType: opts.refType,
+      refId: opts.refId,
+      status: 'sent',
+    });
+  } catch (e: any) {
+    recordNotification({
+      channel: 'email',
+      to: opts.to,
+      subject: opts.subject,
+      bodySummary: opts.body,
+      refType: opts.refType,
+      refId: opts.refId,
+      status: 'failed',
+      error: String(e?.message || e),
+    });
+    throw e;
+  }
+}
+
 /**
  * WhatsApp 适配器（可插拔）：
  * 当前阶段 = mock + 日志（默认接收人 env.WA_TO = +6281513198596 私人测试号）。

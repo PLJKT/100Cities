@@ -20,8 +20,15 @@ export function initDb() {
   // 先迁移已有库（v4 列/表结构与 schema 种子对齐），再执行 schema（新库全建+种子；已有库补缺表）
   runMigrations();
 
+  // schema 里含示范种子（lead/pipeline 等引用 id=1 的用户），全新库在 admin 建出来之前
+  // 直接 exec 会撞外键。DDL 与种子阶段临时关闭外键，结束后立即恢复并做一次校验。
+  db.pragma('foreign_keys = OFF');
   const schema = fs.readFileSync(path.join(__dirname, '..', 'db', 'schema.sql'), 'utf8');
   db.exec(schema);
+
+  // v5：老库补列 + 规则种子 + 存量数据回填（都可重复执行）
+  require('../db/migrate_v5').migrateV5(db);
+  db.pragma('foreign_keys = ON');
 
   seedInitialAdmin();
 }

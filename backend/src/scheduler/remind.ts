@@ -3,6 +3,8 @@ import { getDb } from '../config/db';
 import { env } from '../config/env';
 import { sendReminderEmail, sendWhatsAppNotification } from '../modules/notify/notify.service';
 import { writeLog } from '../modules/log/log.service';
+import { sweepExpiredHolds, sweepOverdueTasks, sweepStageOverdue } from '../modules/automation/task.service';
+import { drain } from '../modules/automation/bus';
 
 /**
  * 定时任务（每天 09:00）：
@@ -39,5 +41,28 @@ export function startReminderScheduler() {
       }
     }
     console.log(`[scheduler] daily scan done, ${pending.length} pending items reviewed.`);
+  });
+
+  /**
+   * v5：自动化的定时补偿（每 15 分钟）
+   * - 未派发的事件补偿（进程重启/异常中断后的兜底）
+   * - 任务逾期 → 升级 + 通知
+   * - 阶段 SLA 违约 → 生成抢修任务
+   * - 预留到期 → 自动释放回池
+   */
+  schedule.scheduleJob('*/15 * * * *', () => {
+    try {
+      const drained = drain();
+      const tasks = sweepOverdueTasks();
+      const stages = sweepStageOverdue();
+      const holds = sweepExpiredHolds();
+      if (drained.processed || tasks.escalated || stages.breached || holds.released) {
+        console.log(
+          `[scheduler:automation] events=${drained.processed} escalated=${tasks.escalated} sla=${stages.breached} holdsReleased=${holds.released}`
+        );
+      }
+    } catch (e) {
+      console.error('[scheduler:automation]', e);
+    }
   });
 }

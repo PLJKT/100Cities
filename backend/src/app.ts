@@ -16,6 +16,9 @@ import reviewRoutes from './modules/review/review.routes';
 import exportRoutes from './modules/export/export.routes';
 import dashboardRoutes from './modules/dashboard/dashboard.routes';
 import publicRoutes from './modules/public/public.routes';
+import caseRoutes from './modules/case/case.routes';
+import taskRoutes from './modules/task/task.routes';
+import automationRoutes from './modules/automation/automation.routes';
 
 export function createApp() {
   const app = express();
@@ -39,6 +42,9 @@ export function createApp() {
   app.use('/api/export', exportRoutes);
   app.use('/api/dashboard', dashboardRoutes);
   app.use('/api/public', publicRoutes);
+  app.use('/api/cases', caseRoutes);
+  app.use('/api/tasks', taskRoutes);
+  app.use('/api/automation', automationRoutes);
 
   app.use(errorHandler);
   return app;

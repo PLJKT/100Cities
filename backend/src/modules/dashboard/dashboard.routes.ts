@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authRequired, AuthedRequest } from '../../middlewares/auth';
 import { requirePerm } from '../../middlewares/rbac';
 import { getDb } from '../../config/db';
+import { STAGE_SLA_DAYS } from '../automation/case.service';
 
 const r = Router();
 
@@ -94,6 +95,40 @@ r.get('/summary', authRequired, requirePerm('dashboard'), (_req: AuthedRequest, 
   const pipelinesByStage = rows(`SELECT stage AS k, COUNT(*) c FROM pipeline GROUP BY stage`);
   const pipelineEvents = q(`SELECT COUNT(*) c FROM pipeline_event`);
 
+  // ---------- v5：待办/联动改为读持久化实体 ----------
+  // 关键变化：todos 不再用 COUNT(*) 现拼，而是读 task 表，和任务中心是同一份数据
+  const tasksOpen = q(`SELECT COUNT(*) c FROM task WHERE status='open'`);
+  const tasksOverdue = q(`SELECT COUNT(*) c FROM task WHERE status='open' AND due_at IS NOT NULL AND due_at < datetime('now')`);
+  const tasksByType = rows(`SELECT task_type AS k, COUNT(*) c FROM task WHERE status='open' GROUP BY task_type ORDER BY c DESC`);
+  const tasksByAssignee = rows(
+    `SELECT COALESCE(u.username,'Unassigned') AS k, COUNT(*) c
+     FROM task t LEFT JOIN sys_user u ON u.id=t.assignee_user_id
+     WHERE t.status='open' GROUP BY k ORDER BY c DESC`
+  );
+  const casesByLifecycle = rows(`SELECT lifecycle AS k, COUNT(*) c FROM biz_case GROUP BY lifecycle`);
+  const casesByStage = rows(`
+    SELECT COALESCE(p.stage,'intake') AS k, COUNT(*) c FROM biz_case c
+    LEFT JOIN pipeline p ON p.case_id=c.id
+    WHERE c.lifecycle NOT IN ('won','lost','dropped') GROUP BY k`);
+  const eventTotal = q(`SELECT COUNT(*) c FROM biz_event`);
+  const eventPending = q(`SELECT COUNT(*) c FROM biz_event WHERE status='pending'`);
+  const ruleApplied = q(`SELECT COUNT(*) c FROM automation_run WHERE outcome='applied'`);
+  const ruleErrors = q(`SELECT COUNT(*) c FROM automation_run WHERE outcome='error'`);
+  const holdActive = q(`SELECT COUNT(*) c FROM asset_hold WHERE status IN ('active','confirmed')`);
+
+  // 阶段 SLA 违约（按每阶段阈值在 JS 里判，避免写死 SQL）
+  const stageAgeRows = rows(`
+    SELECT c.case_no, c.org_name, p.stage, p.entered_at FROM biz_case c
+    JOIN pipeline p ON p.case_id=c.id
+    WHERE c.lifecycle NOT IN ('won','lost','dropped')`);
+  const slaBreaches = stageAgeRows
+    .map((r: any) => {
+      const age = Math.floor((Date.now() - new Date(String(r.entered_at).replace(' ', 'T') + 'Z').getTime()) / 86400000);
+      return { ...r, age_days: age, sla_days: STAGE_SLA_DAYS[r.stage] ?? 14 };
+    })
+    .filter((r: any) => r.age_days >= r.sla_days)
+    .sort((a: any, b: any) => b.age_days - b.sla_days - (a.age_days - a.sla_days));
+
   const kv = (arr: any[]) => Object.fromEntries(arr.map((x) => [x.k, x.c]));
 
   res.json({
@@ -110,7 +145,26 @@ r.get('/summary', authRequired, requirePerm('dashboard'), (_req: AuthedRequest, 
     projects: { total: projectTotal, byStage: kv(projectsByStage), byStatus: kv(projectsByStatus), avgProgress: Math.round(avgProgress) },
     partners: { total: partnerTotal, byTier: kv(partnersByTier) },
     pipeline: { byStage: kv(pipelinesByStage), totalEvents: pipelineEvents, funnel: funnelMap, weightedValue, pipelineCount, stageAges },
-    todos,
+    // v5：任务即待办（与 /api/tasks 同源）
+    tasks: {
+      open: tasksOpen,
+      overdue: tasksOverdue,
+      byType: kv(tasksByType),
+      byAssignee: kv(tasksByAssignee),
+    },
+    // v5：案件主链（lifecycle 与 stage 两条视角）
+    cases: { byLifecycle: kv(casesByLifecycle), byStage: kv(casesByStage) },
+    // v5：自动化健康度
+    automation: {
+      events: eventTotal,
+      pendingEvents: eventPending,
+      rulesApplied: ruleApplied,
+      ruleErrors: ruleErrors,
+      activeHolds: holdActive,
+      slaBreaches: slaBreaches.slice(0, 20),
+      slaBreachCount: slaBreaches.length,
+    },
+    todos: { ...todos, openTasks: tasksOpen, overdueTasks: tasksOverdue },
   });
 });
 

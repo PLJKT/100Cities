@@ -96,6 +96,26 @@ npm run dev          # http://localhost:5173, /api 代理到 8080
 
 默认 Phase1 模板已种子 7 字段：partner_name / entity_nationality / asset_summary / qualifications / cooperation_intent(select,5 选项) / target_segment(multiselect,7 板块) / attachments(file)。
 
+## 后端 v5 能力：事件驱动的模块联动（已实现，前端待接）
+
+> 回应"内容协调有问题、模块自动化联动没有体现"：把散落在各路由里的手写 if，换成**业务事件 → 规则 → 动作 → 产物**的闭环。设计全文见 `交付物3-v5自动化架构设计.md`；本地冒烟 **57/57** 通过。
+
+| 能力 | 接口 | 说明 |
+|---|---|---|
+| 统一案件主链 | `GET /api/cases`、`GET /:id`、`GET /:id/timeline`、`GET /:id/explain` | 一条记录串起 提交→会员→线索→阶段→项目→资产；360 视图 + 统一时间线 + "这条任务为什么出现"的溯源 |
+| 阶段唯一写入口 | `POST /api/cases/:id/stage` | 事务内改 pipeline + 写 pipeline_event + 同步 lead + 发事件；回退需 `force` 并留痕 |
+| 成交/失单 | `POST /:id/won`、`/lost` | 成交 → 资产 leased + 释放竞争预留 + 项目 completed；失单 → 资产回池 + 复盘任务 |
+| 任务实体（待办） | `GET/PUT /api/tasks` | 可分配、可计时、可升级；Dashboard 数字与任务中心同源 |
+| 自动化台 | `GET /api/automation/rules`、`/events`、`/runs`、`POST /replay/:eventId`、`/sweep` | 13 条规则启停与执行统计、事件流、决策台账、单事件重放 |
+| 资产预留 | `GET /api/assets/:id/holds`、`POST /api/assets/holds/:holdId/release` | 软预留 `held` / 硬预留 `reserved`，带到期时间；冲突不覆盖，升级给人裁决 |
+| 补偿调度 | `*/15 * * * *` | 事件补偿派发 + 逾期升级 + 阶段 SLA + 预留到期释放 |
+
+**v5 语义边界**：`sys_operation_log` = 审计（谁做了什么，不驱动下游）；`biz_event` = 业务事实（发生了什么，append-only，驱动自动化）；`automation_run` = 决策台账（某规则为何执行/跳过）。
+
+**v5 迁移**：`db.ts` 在 `schema.exec` 后挂 `migrate_v5`（补列 + 13 条规则 + 存量 lead/partner 回填成案，全部幂等）。全新库因种子引用 `id=1` 用户，DDL/种子阶段临时 `foreign_keys=OFF`，运行期照常开启。
+
+**前端现状**：案件中心 `/app/cases`、任务中心 `/app/tasks`、自动化台 `/app/automation` 已建并接好接口（三语词条已补），`tsc` exit 0、`vite build` 通过；`VITE_USE_MOCK` 仍为 `true`，演示态走 mock 数据，接真只需改 `.env`。Dashboard 尚未消费 `tasks/cases/automation` 三块新字段。
+
 ## 核心安全 / 合规约定
 
 1. **文件零落盘**：附件仅 Stream 内存处理，打包推邮件后销毁；不写磁盘、不入 DB。
